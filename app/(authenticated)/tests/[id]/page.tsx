@@ -26,7 +26,11 @@ interface Test {
   completedAt: string | null;
 }
 
-export default function TestPage({ params }: { params: { id: string } }) {
+export default function TestPage({
+  params,
+}: {
+  readonly params: { readonly id: string };
+}) {
   const router = useRouter();
   const { status } = useSession();
   const [test, setTest] = useState<Test | null>(null);
