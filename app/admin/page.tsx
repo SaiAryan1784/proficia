@@ -1,6 +1,4 @@
 // src/app/admin/page.tsx
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
 export default async function AdminDashboard() {

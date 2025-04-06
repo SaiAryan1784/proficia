@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useState, useEffect } from "react";
@@ -29,7 +28,7 @@ interface Test {
 
 export default function TestPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const [test, setTest] = useState<Test | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -65,7 +64,7 @@ export default function TestPage({ params }: { params: { id: string } }) {
           setShowResults(true);
         }
       } catch (error) {
-        setError("Error loading test. Please try again later.");
+        setError(error instanceof Error ? error.message : "An unknown error occurred.");
       } finally {
         setLoading(false);
       }
@@ -120,7 +119,7 @@ export default function TestPage({ params }: { params: { id: string } }) {
       setTotalScore(data.score);
       setShowResults(true);
     } catch (error) {
-      setError("Error submitting test. Please try again.");
+      setError(error instanceof Error ? error.message : "An unknown error occurred.");
     }
   };
 

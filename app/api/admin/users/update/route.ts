@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to update user" },
+      { error: error instanceof Error ? error.message : "An unknown error occurred." },
       { status: 500 }
     );
   }
