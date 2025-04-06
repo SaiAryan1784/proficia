@@ -1,3 +1,4 @@
+"use client"
 import React, { useState } from 'react';
 import { TestCards } from '@/lib/data';
 import Image from 'next/image';
