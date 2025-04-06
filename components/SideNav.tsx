@@ -1,21 +1,22 @@
 "use client";
 import Link from 'next/link';
 import React, { useState, useEffect, FC } from 'react';
-import { FiHome, FiFileText, FiEdit, FiBarChart2, FiUser, FiMail, FiMenu, FiX } from 'react-icons/fi';
+import { FiHome, FiUser, FiMail, FiMenu, FiX, FiLogOut } from 'react-icons/fi';
 import { usePathname } from 'next/navigation';
+import { signOut } from 'next-auth/react';
 
 interface NavItem {
   href: string;
   label: string;
-  icon: JSX.Element;
+  icon: React.ReactNode;
 }
 
 const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Home', icon: <FiHome size={20} /> },
-  { href: '/practice', label: 'Practice', icon: <FiEdit size={20} /> },
-  { href: '/statistics', label: 'Statistics', icon: <FiBarChart2 size={20} /> },
+  // { href: '/practice', label: 'Practice', icon: <FiEdit size={20} /> },
+  // { href: '/statistics', label: 'Statistics', icon: <FiBarChart2 size={20} /> },
   { href: '/profile', label: 'Profile', icon: <FiUser size={20} /> },
-  { href: '/contactUs', label: 'Contact Us', icon: <FiMail size={20} /> },
+  { href: '/contact', label: 'Contact', icon: <FiMail size={20} /> },
 ];
 
 const SideNav: FC = () => {
@@ -135,8 +136,28 @@ const SideNav: FC = () => {
         p-4 border-t border-blue-400/30 text-center text-sm text-blue-700
         ${isCollapsed ? 'hidden' : 'block'}
       `}>
-        © 2025 Proficia
+        <button 
+          onClick={() => signOut({ callbackUrl: '/login' })}
+          className="w-full py-2 mt-2 flex items-center justify-center gap-2 bg-white rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+        >
+          <FiLogOut size={18} />
+          <span>Logout</span>
+        </button>
+        <div className="mt-3">© 2025 Proficia</div>
       </div>
+
+      {/* Logout button for collapsed mode */}
+      {isCollapsed && (
+        <div className="p-4 border-t border-blue-400/30 flex justify-center">
+          <button
+            onClick={() => signOut({ callbackUrl: '/login' })}
+            className="p-3 rounded-lg bg-white text-red-600 hover:bg-red-50 transition-colors"
+            title="Logout"
+          >
+            <FiLogOut size={20} />
+          </button>
+        </div>
+      )}
 
       {/* Close button for mobile menu */}
       {isMobileOpen && typeof window !== 'undefined' && window.innerWidth < 1024 && (

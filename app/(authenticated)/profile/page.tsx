@@ -190,28 +190,28 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto py-8">
+    <div className="max-w-3xl mx-auto py-4 sm:py-6 md:py-8 px-4 sm:px-6">
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="bg-gradient-to-r from-blue-400 to-purple-500 px-6 py-4">
-          <h1 className="text-2xl font-bold text-white">Profile</h1>
+        <div className="bg-gradient-to-r from-blue-400 to-purple-500 px-4 sm:px-6 py-3 sm:py-4">
+          <h1 className="text-xl sm:text-2xl font-bold text-white">Profile</h1>
         </div>
 
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {successMessage && (
-            <div className="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+            <div className="mb-4 sm:mb-6 bg-green-100 border border-green-400 text-green-700 px-3 sm:px-4 py-2 sm:py-3 rounded relative">
               {successMessage}
             </div>
           )}
 
           {error && (
-            <div className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+            <div className="mb-4 sm:mb-6 bg-red-100 border border-red-400 text-red-700 px-3 sm:px-4 py-2 sm:py-3 rounded relative">
               {error}
             </div>
           )}
 
-          <div className="flex flex-col md:flex-row items-start gap-8">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
             <div className="flex flex-col items-center">
-              <div className="relative w-48 h-48 mb-4 rounded-full overflow-hidden bg-gray-200">
+              <div className="relative w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 mb-4 rounded-full overflow-hidden bg-gray-200">
                 {userData.image && !imageError ? (
                   <Image
                     src={userData.image}
@@ -221,14 +221,14 @@ export default function ProfilePage() {
                     onError={() => setImageError(true)}
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-500 text-5xl font-semibold">
+                  <div className="w-full h-full flex items-center justify-center text-gray-500 text-3xl sm:text-4xl md:text-5xl font-semibold">
                     {userData.name ? userData.name.charAt(0).toUpperCase() : "U"}
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="flex-1">
+            <div className="flex-1 w-full md:w-auto">
               {editMode ? (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
@@ -244,7 +244,7 @@ export default function ProfilePage() {
                       name="name"
                       value={editableData.name}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                     />
                   </div>
 
@@ -256,14 +256,14 @@ export default function ProfilePage() {
                       type="email"
                       value={userData.email}
                       disabled
-                      className="w-full px-4 py-2 border border-gray-200 rounded-md bg-gray-50 text-gray-500"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-md bg-gray-50 text-gray-500 text-sm sm:text-base"
                     />
                     <p className="mt-1 text-xs text-gray-500">
                       Email cannot be changed
                     </p>
                   </div>
 
-                  <div className="flex space-x-4 pt-4">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
                     <ButtonPrimary
                       type="submit"
                       text={isSaving ? "Saving..." : "Save Changes"}
@@ -272,7 +272,7 @@ export default function ProfilePage() {
                     <button
                       type="button"
                       onClick={handleEditModeToggle}
-                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                      className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-sm sm:text-base transition-colors"
                     >
                       Cancel
                     </button>
@@ -300,7 +300,7 @@ export default function ProfilePage() {
                           value={passwordData.currentPassword}
                           onChange={handlePasswordChange}
                           required
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                         />
                       </div>
 
@@ -318,7 +318,7 @@ export default function ProfilePage() {
                           value={passwordData.newPassword}
                           onChange={handlePasswordChange}
                           required
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                         />
                         <p className="mt-1 text-xs text-gray-500">
                           Password must be at least 8 characters long
@@ -339,11 +339,11 @@ export default function ProfilePage() {
                           value={passwordData.confirmPassword}
                           onChange={handlePasswordChange}
                           required
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                         />
                       </div>
 
-                      <div className="flex space-x-4 pt-4">
+                      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
                         <ButtonPrimary
                           type="submit"
                           text={isChangingPassword ? "Changing..." : "Change Password"}
@@ -352,7 +352,7 @@ export default function ProfilePage() {
                         <button
                           type="button"
                           onClick={handlePasswordModeToggle}
-                          className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                          className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-sm sm:text-base transition-colors"
                         >
                           Cancel
                         </button>
@@ -366,7 +366,7 @@ export default function ProfilePage() {
                       <button
                         type="button"
                         onClick={handlePasswordModeToggle}
-                        className="mt-4 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                        className="mt-4 px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-sm sm:text-base transition-colors"
                       >
                         Back to Profile
                       </button>
@@ -382,19 +382,19 @@ export default function ProfilePage() {
                     <div className="mt-4 space-y-4">
                       <div>
                         <p className="text-sm font-medium text-gray-500">Name</p>
-                        <p className="mt-1 text-lg">{userData.name || "-"}</p>
+                        <p className="mt-1 text-base sm:text-lg">{userData.name || "-"}</p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-500">
                           Email
                         </p>
-                        <p className="mt-1 text-lg">{userData.email}</p>
+                        <p className="mt-1 text-base sm:text-lg">{userData.email}</p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-500">
                           Account Type
                         </p>
-                        <p className="mt-1 text-lg">
+                        <p className="mt-1 text-base sm:text-lg">
                           {userData.email.includes("@gmail.com")
                             ? "Google Account"
                             : "Email & Password"}
@@ -403,7 +403,7 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                     <ButtonPrimary
                       text="Edit Profile"
                       onClick={handleEditModeToggle}
@@ -411,7 +411,7 @@ export default function ProfilePage() {
                     <button
                       type="button"
                       onClick={handlePasswordModeToggle}
-                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                      className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-sm sm:text-base transition-colors"
                     >
                       Change Password
                     </button>
