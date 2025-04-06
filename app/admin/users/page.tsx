@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import Link from "next/link";
 
 export default async function UsersPage() {
-  const users = await prisma.user.findMany({
+  const users = await prisma.users.findMany({
     orderBy: { email: 'asc' },
     select: {
       id: true,

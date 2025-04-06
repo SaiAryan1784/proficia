@@ -1,13 +1,15 @@
 // src/app/page.tsx
+import ButtonPrimary from "@/components/ButtonPrimary";
+import NavbarPrimary from "@/components/NavbarPrimary";
+import LandingPage from "@/section/LandingPage";
 import Link from "next/link";
 
 export default function HomePage() {
   return (
     <div>
-      <h1>Welcome to Next.js Auth App</h1>
       <div>
-        <Link href="/login">Login</Link>
-        <Link href="/register">Register</Link>
+        <NavbarPrimary />
+        <LandingPage />
       </div>
     </div>
   );

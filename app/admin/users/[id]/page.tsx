@@ -1,5 +1,6 @@
 // src/app/admin/users/[id]/page.tsx
 import { prisma } from "@/lib/db";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 export default async function EditUserPage({
@@ -7,7 +8,7 @@ export default async function EditUserPage({
 }: {
   params: { id: string }
 }) {
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { id: params.id }
   });
   
@@ -67,12 +68,12 @@ export default async function EditUserPage({
               Update User
             </button>
             
-            <a 
+            <Link 
               href="/admin/users"
               className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
             >
               Cancel
-            </a>
+            </Link>
           </div>
         </form>
       </div>

@@ -1,15 +1,15 @@
+// src/app/admin/layout.tsx
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import SideNav from "@/components/SideNav"; // Ensure this component exists
+import SideNav from "@/components/SideNav"; // Make sure to update the import
 
-export default async function AdminLayout({
+export default async function AuthenticatedLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Get session on the server
   const session = await getServerSession(authOptions);
   
   // Redirect if not logged in
@@ -17,22 +17,12 @@ export default async function AdminLayout({
     redirect("/login");
   }
   
-  // Check if user is admin
-  const user = await prisma.users.findUnique({
-    where: { id: session.user.id },
-    select: { isAdmin: true }
-  });
-  
-  if (!user?.isAdmin) {
-    redirect("/dashboard");
-  }
-
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar Navigation */}
       <SideNav />
       
-      {/* Main Content */}
+      {/* Main Content with proper margin */}
       <main className="flex-1 transition-all duration-300 lg:ml-60">
         <div className="container mx-auto px-4 py-6">
           {children}

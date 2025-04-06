@@ -9,7 +9,7 @@ datasource db {
 }
 
 // prisma/schema.prisma
-model User {
+model users {
   id            String    @id @default(cuid())
   name          String?
   email         String    @unique
@@ -21,6 +21,7 @@ model User {
   isAdmin       Boolean   @default(false)
   accounts      Account[]
   sessions      Session[]
+  tests         Test[]    // Relation to tests taken by the user
 }
 model Account {
   id                 String  @id @default(cuid())
@@ -36,7 +37,7 @@ model Account {
   id_token           String? @db.Text
   session_state      String?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user users @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -46,7 +47,7 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         users     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
@@ -55,4 +56,59 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// New models for test generation
+
+model Topic {
+  id          String    @id @default(cuid())
+  name        String
+  description String
+  imageUrl    String?
+  category    String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  tests       Test[]
+}
+
+model Test {
+  id           String     @id @default(cuid())
+  title        String
+  description  String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  userId       String
+  topicId      String
+  status       TestStatus @default(DRAFT)
+  score        Float?     // User's score if the test has been taken
+  startedAt    DateTime?
+  completedAt  DateTime?
+  questions    Question[]
+  user         users      @relation(fields: [userId], references: [id])
+  topic        Topic      @relation(fields: [topicId], references: [id])
+}
+
+model Question {
+  id          String       @id @default(cuid())
+  testId      String
+  text        String
+  type        QuestionType
+  options     String[]     // For multiple choice questions
+  correctAnswer String?    // For simple answer questions
+  explanation String?      // Explanation of the correct answer
+  userAnswer  String?      // The user's answer
+  isCorrect   Boolean?     // Whether the user's answer was correct
+  test        Test         @relation(fields: [testId], references: [id], onDelete: Cascade)
+}
+
+enum TestStatus {
+  DRAFT
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TEXT
+  TRUE_FALSE
 }

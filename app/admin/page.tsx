@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
 export default async function AdminDashboard() {
-  const totalUsers = await prisma.user.count();
+  const totalUsers = await prisma.users.count();
   
   return (
     <div>
@@ -24,7 +24,7 @@ export default async function AdminDashboard() {
         <div className="bg-white p-6 rounded shadow">
           <h3 className="text-lg font-medium">New Users (Last 7 Days)</h3>
           <p className="text-3xl font-bold">
-            {await prisma.user.count({
+            {await prisma.users.count({
               where: {
                 createdAt: {
                   gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)

@@ -1,24 +1,29 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
-import AuthProvider from "@/components/SessionProvider";
+// layout.tsx - Version 2
 import type { Metadata } from "next";
+import { Syne } from "next/font/google";
+import AuthProvider from "@/components/SessionProvider";
+import "./globals.css";
+import RouteLoader from "@/components/RouteLoader";
 
 export const metadata: Metadata = {
   title: "Next.js Auth App",
   description: "Next.js app with authentication",
 };
 
-export default async function RootLayout({
+const syne = Syne({ subsets: ["latin"] });
+
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerSession(authOptions);
-
   return (
     <html lang="en">
-      <body>
-        <AuthProvider session={session}>{children}</AuthProvider>
+      <body className={`min-h-screen bg-gradient-to-r from-[#88aee179] via-[#5838d850] to-[#d8b4fe5a] ${syne.className}`}>
+        <AuthProvider>
+          <RouteLoader />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

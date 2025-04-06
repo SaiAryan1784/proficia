@@ -15,7 +15,7 @@ export async function POST(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   
-  const currentUser = await prisma.user.findUnique({
+  const currentUser = await prisma.users.findUnique({
     where: { id: session.user.id },
     select: { isAdmin: true }
   });
@@ -28,7 +28,7 @@ export async function POST(
     const userId = params.id;
     
     // Get current admin status
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id: userId },
       select: { isAdmin: true }
     });
@@ -38,7 +38,7 @@ export async function POST(
     }
     
     // Toggle admin status
-    const updatedUser = await prisma.user.update({
+    const updatedUser = await prisma.users.update({
       where: { id: userId },
       data: { isAdmin: !user.isAdmin },
       select: { id: true, email: true, isAdmin: true }
