@@ -26,11 +26,13 @@ interface Test {
   completedAt: string | null;
 }
 
-export default function TestPage({
-  params,
-}: {
-  readonly params: { readonly id: string };
-}) {
+interface PageProps {
+  params: {
+    id: string;
+  };
+}
+
+export default function TestPage({ params }: PageProps){
   const router = useRouter();
   const { status } = useSession();
   const [test, setTest] = useState<Test | null>(null);
