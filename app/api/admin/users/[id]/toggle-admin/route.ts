@@ -1,29 +1,28 @@
-// src/app/api/admin/users/[id]/toggle-admin/route.ts
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
-export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {
-  const params = await props.params;
+export async function POST(request: Request, props: { params: { id: string } }) {
+  const { id } = props.params;
   const session = await getServerSession(authOptions);
-
+  
   // Check if user is logged in and is an admin
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
+  
   const currentUser = await prisma.users.findUnique({
     where: { id: session.user.id },
     select: { isAdmin: true }
   });
-
+  
   if (!currentUser?.isAdmin) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
-
+  
   try {
-    const userId = params.id;
+    const userId = id;
     
     // Get current admin status
     const user = await prisma.users.findUnique({
