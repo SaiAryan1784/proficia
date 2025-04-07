@@ -3,19 +3,20 @@ import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-export default async function EditUserPage({
-  params
-}: {
-  params: { id: string }
-}) {
+export default async function EditUserPage(
+  props: {
+    params: Promise<{ id: string }>
+  }
+) {
+  const params = await props.params;
   const user = await prisma.users.findUnique({
     where: { id: params.id }
   });
-  
+
   if (!user) {
     notFound();
   }
-  
+
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Edit User</h1>

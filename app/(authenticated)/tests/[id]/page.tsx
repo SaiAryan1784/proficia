@@ -30,14 +30,15 @@ interface Test {
 }
 
 // Page is now a Server Component that receives params
-export default async function TestPage({ params }: { params: { id: string } }) {
+export default async function TestPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const session = await getServerSession(authOptions);
-  
+
   // Redirect if not logged in
   if (!session?.user) {
     redirect("/login");
   }
-  
+
   // Server-side fetch of the test data
   // Using the actual schema structure from your Prisma model
   const test = await prisma.test.findUnique({
@@ -46,12 +47,12 @@ export default async function TestPage({ params }: { params: { id: string } }) {
       questions: true
     }
   });
-  
+
   if (!test) {
     // Test not found
     redirect("/dashboard");
   }
-  
+
   // Map database data to the expected Test format for the client
   // Based on your actual Question model which already has options as string[]
   const formattedTest: Test = {
@@ -73,7 +74,7 @@ export default async function TestPage({ params }: { params: { id: string } }) {
       isCorrect: q.isCorrect || undefined
     }))
   };
-  
+
   // Pass the data to a client component for interactivity
   return <TestClient test={formattedTest} />;
 } 
