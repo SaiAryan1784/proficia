@@ -6,8 +6,8 @@ import "./globals.css";
 import RouteLoader from "@/components/RouteLoader";
 
 export const metadata: Metadata = {
-  title: "Next.js Auth App",
-  description: "Next.js app with authentication",
+  title: "Proficia",
+  description: "A GenAI based test taking app to improve your skills",
 };
 
 const syne = Syne({ subsets: ["latin"] });
