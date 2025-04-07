@@ -3,8 +3,12 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
-export async function POST(request: Request, props: { params: { id: string } }) {
-  const { id } = props.params;
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  // Await the params to get the id
+  const { id } = await params;
   const session = await getServerSession(authOptions);
   
   // Check if user is logged in and is an admin
