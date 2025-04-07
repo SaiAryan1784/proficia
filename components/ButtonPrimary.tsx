@@ -15,7 +15,8 @@ const ButtonPrimary: React.FC<ButtonPrimaryProps> = ({
   onClick,
   className = ""
 }) => {
-    return (
+  return (
+    <div className="flex justify-center w-full">
       <button 
         type={type} 
         disabled={disabled}
@@ -43,7 +44,8 @@ const ButtonPrimary: React.FC<ButtonPrimaryProps> = ({
       >
         {text}
       </button>
-    );
-  };
+    </div>
+  );
+};
 
 export default ButtonPrimary;

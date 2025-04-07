@@ -28,7 +28,7 @@ const LandingPage = () => {
   }, [])
   
   return (
-    <div className="flex flex-col justify-center h-[97vh] px-4">
+    <div className="relative min-h-[90vh] md:min-h-screen flex items-center justify-center">
       <div className="ml-8 md:ml-16">
         <h1 className="text-4xl md:text-6xl font-bold mb-8 text-left text-transparent bg-clip-text bg-gradient-to-r from-[#456cc5] to-[#435170]" style={{ backgroundSize: '200% 100%', backgroundPosition: '70% 0' }}>
           A New Way To <br /> Learn{" "}
