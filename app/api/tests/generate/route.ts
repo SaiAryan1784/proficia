@@ -56,7 +56,7 @@ export async function POST(request: Request) {
     // Generate test content using Groq API
     const testContent = await generateTestWithGroq({
       topic: topic.name,
-      description: topic.description,
+      description: topic.description || "",
       difficulty,
       questionCount: Number(questionCount)
     });
