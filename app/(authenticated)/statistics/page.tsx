@@ -67,7 +67,7 @@ export default async function StatisticsPage() {
           </div>
 
           {/* Test History Table - Responsive Version */}
-          <div className="bg-white rounded-lg sm:hidden shadow-md overflow-hidden">
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -112,7 +112,7 @@ export default async function StatisticsPage() {
           </div>
           
           {/* Responsive card view for mobile */}
-          <div className="md:hidden mt-4 space-y-4">
+          {/* <div className="md:hidden mt-4 space-y-4">
             {testHistory.map((test) => (
               <div key={`mobile-${test.id}`} className="bg-white rounded-lg shadow p-4">
                 <h3 className="font-medium text-gray-900">{test.title}</h3>
@@ -142,7 +142,7 @@ export default async function StatisticsPage() {
                 </div>
               </div>
             ))}
-          </div>
+          </div> */}
         </div>
       )}
     </div>
