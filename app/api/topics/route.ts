@@ -15,12 +15,23 @@ export async function GET() {
       );
     }
 
-    // Fetch all topics
-    const topics = await prisma.topic.findMany({
+    // Fetch all topics and deduplicate by name
+    const allTopics = await prisma.topic.findMany({
       orderBy: { name: 'asc' }
     });
 
-    return NextResponse.json(topics);
+    // Use a Map to keep only one entry per topic name (keeping the first occurrence)
+    const uniqueTopicsMap = new Map();
+    allTopics.forEach(topic => {
+      if (!uniqueTopicsMap.has(topic.name)) {
+        uniqueTopicsMap.set(topic.name, topic);
+      }
+    });
+
+    // Convert back to array
+    const uniqueTopics = Array.from(uniqueTopicsMap.values());
+    return NextResponse.json(uniqueTopics);
+    
   } catch (error) {
     console.error('Error fetching topics:', error);
     return NextResponse.json(

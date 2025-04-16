@@ -39,11 +39,16 @@ async function main() {
     ]
 
     for (const topic of topics) {
-      await prisma.$executeRawUnsafe(`
-        INSERT INTO "Topic" (id, name, description, "imageUrl", category, "createdAt", "updatedAt")
-        VALUES (gen_random_uuid(), '${topic.name}', '${topic.description}', '${topic.imageUrl}', '${topic.category}', NOW(), NOW())
-        ON CONFLICT (id) DO NOTHING
-      `);
+      await prisma.topic.upsert({
+        where: { name: topic.name },
+        update: {},
+        create: {
+          name: topic.name,
+          description: topic.description,
+          imageUrl: topic.imageUrl,
+          category: topic.category,
+        },
+      })
     }
 
     console.log('Database seeded successfully')
@@ -59,4 +64,4 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect()
-  }) 
+  })

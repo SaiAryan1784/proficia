@@ -196,15 +196,6 @@ export default function DashboardPage() {
           {isGenerating ? 'Generating Test...' : 'Generate Test'}
         </button>
       </div>
-      
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Recent Tests</h2>
-        
-        <div className="text-center py-8 text-gray-500">
-          <p>You haven&apos;t taken any tests yet.</p>
-          <p className="mt-2">Select a topic above to get started!</p>
-        </div>
-      </div>
     </div>
   );
 }
