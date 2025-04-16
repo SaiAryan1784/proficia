@@ -1,7 +1,7 @@
 "use client";
 import Link from 'next/link';
 import React, { useState, useEffect, FC } from 'react';
-import { FiHome, FiUser, FiMail, FiMenu, FiX, FiLogOut,FiBarChart2 } from 'react-icons/fi';
+import { FiHome, FiUser, FiMail, FiMenu, FiX, FiLogOut, FiBarChart2 } from 'react-icons/fi';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 
@@ -13,7 +13,6 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Home', icon: <FiHome size={20} /> },
-  // { href: '/practice', label: 'Practice', icon: <FiEdit size={20} /> },
   { href: '/statistics', label: 'Statistics', icon: <FiBarChart2 size={20} /> },
   { href: '/profile', label: 'Profile', icon: <FiUser size={20} /> },
   { href: '/contact', label: 'Contact', icon: <FiMail size={20} /> },
@@ -32,7 +31,7 @@ const SideNav: FC = () => {
     // Set initial state based on screen size
     const handleResize = () => {
       if (typeof window !== 'undefined') {
-        setIsCollapsed(window.innerWidth < 1024);
+        setIsCollapsed(window.innerWidth < 1280); // Increased breakpoint for better usability
       }
     };
     
@@ -58,117 +57,146 @@ const SideNav: FC = () => {
     setIsMobileOpen(!isMobileOpen);
   };
 
+  // Helper to determine if sidebar should be visible
+  const isSidebarVisible = () => {
+    if (!isMounted) return false;
+    if (typeof window === 'undefined') return false;
+    
+    // Always show on large screens or when mobile menu is open
+    return window.innerWidth >= 1024 || isMobileOpen;
+  };
+
+  if (!isMounted) {
+    return null; // Prevent layout shift on initial load
+  }
+
   return (
-    <aside
-      className={`
-        fixed top-0 left-0 h-full z-40 transition-all duration-300
-        bg-gradient-to-b from-blue-300 to-purple-300
-        text-blue-900 shadow-lg flex flex-col border-r-0
-        ${isCollapsed ? 'w-20 items-center' : 'w-60 items-stretch'}
-        ${isMounted && !isMobileOpen && typeof window !== 'undefined' && window.innerWidth < 1024 ? '-translate-x-full' : 'translate-x-0'}
-      `}
-    >
-      {/* Mobile Navigation Toggle - Shown only when sidebar is collapsed on mobile */}
+    <>
+      {/* Mobile Navigation Toggle - Fixed position */}
       {isMounted && !isMobileOpen && typeof window !== 'undefined' && window.innerWidth < 1024 && (
-        <div className="fixed top-4 left-4 z-50">
-          <button 
-            onClick={toggleMobileMenu}
-            className="p-2 rounded-lg bg-blue-400 text-white shadow-lg hover:bg-blue-500 transition-all"
-          >
-            <FiMenu size={24} />
-          </button>
-        </div>
-      )}
-
-      {/* Logo Area */}
-      <div className={`
-        p-4 border-b border-blue-400/30 flex items-center
-        ${isCollapsed ? 'justify-center' : 'justify-between'}
-      `}>
-        {!isCollapsed && <h1 className="text-2xl font-bold">Proficia</h1>}
-        {isCollapsed && <div className="h-10 w-10 rounded-full bg-white text-blue-500 flex items-center justify-center font-bold text-xl">P</div>}
-        
-        {/* Desktop Collapse Toggle */}
-        <button 
-          onClick={toggleCollapse}
-          className="hidden lg:block text-blue-700 hover:text-blue-900 transition-colors"
-        >
-          {isCollapsed ? <FiMenu size={20} /> : <FiX size={20} />}
-        </button>
-      </div>
-
-      {/* Navigation Links */}
-      <nav className="flex-1 py-6 overflow-y-auto">
-        <ul className="space-y-2 px-2">
-          {navItems.map(({ href, label, icon }) => {
-            const isActive = pathname === href;
-            
-            return (
-              <li key={href}>
-                <Link 
-                  href={href} 
-                  className={`
-                    relative flex items-center p-3 rounded-lg transition-all
-                    ${isCollapsed ? 'justify-center' : 'justify-start space-x-3'} 
-                    ${isActive 
-                      ? 'bg-white text-blue-600 shadow-md font-medium' 
-                      : 'text-blue-800 hover:bg-white/40'}
-                  `}
-                >
-                  <span className={isActive ? 'text-blue-600' : 'text-blue-800'}>
-                    {icon}
-                  </span>
-                  {!isCollapsed && <span className="ml-3">{label}</span>}
-                  
-                  {/* Active indicator */}
-                  {isActive && (
-                    <div className="absolute right-0 h-6 w-1 bg-blue-500 rounded-l-full" />
-                  )}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
-      
-      {/* Footer Area */}
-      <div className={`
-        p-4 border-t border-blue-400/30 text-center text-sm text-blue-700
-        ${isCollapsed ? 'hidden' : 'block'}
-      `}>
-        <button 
-          onClick={() => signOut({ callbackUrl: '/login' })}
-          className="w-full py-2 mt-2 flex items-center justify-center gap-2 bg-white rounded-lg text-red-600 hover:bg-red-50 transition-colors"
-        >
-          <FiLogOut size={18} />
-          <span>Logout</span>
-        </button>
-        <div className="mt-3">© 2025 Proficia</div>
-      </div>
-
-      {/* Logout button for collapsed mode */}
-      {isCollapsed && (
-        <div className="p-4 border-t border-blue-400/30 flex justify-center">
-          <button
-            onClick={() => signOut({ callbackUrl: '/login' })}
-            className="p-3 rounded-lg bg-white text-red-600 hover:bg-red-50 transition-colors"
-            title="Logout"
-          >
-            <FiLogOut size={20} />
-          </button>
-        </div>
-      )}
-
-      {/* Close button for mobile menu */}
-      {isMobileOpen && typeof window !== 'undefined' && window.innerWidth < 1024 && (
         <button 
           onClick={toggleMobileMenu}
-          className="absolute top-4 right-4 p-2 rounded-full bg-white/20 text-blue-900 hover:bg-white/40 transition-all"
+          className="fixed top-4 left-4 z-50 p-3 rounded-lg bg-blue-500 text-white shadow-lg hover:bg-blue-600 transition-all duration-200"
+          aria-label="Open navigation menu"
         >
-          <FiX size={20} />
+          <FiMenu size={24} />
         </button>
       )}
-    </aside>
+
+      {/* Mobile overlay - Only visible when menu is open on mobile */}
+      {isMobileOpen && typeof window !== 'undefined' && window.innerWidth < 1024 && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-30 backdrop-blur-sm"
+          onClick={toggleMobileMenu}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Main Sidebar */}
+      <aside
+        className={`
+          fixed top-0 left-0 h-full z-40 transition-all duration-300 ease-in-out
+          bg-gradient-to-b from-blue-400 to-purple-400
+          text-blue-900 shadow-xl flex flex-col
+          ${isCollapsed ? 'w-20' : 'w-64'}
+          ${isSidebarVisible() ? 'translate-x-0' : '-translate-x-full'}
+        `}
+      >
+        {/* Logo Area */}
+        <div className={`
+          p-5 border-b border-blue-400/30 flex items-center
+          ${isCollapsed ? 'justify-center' : 'justify-between'}
+        `}>
+          {!isCollapsed && (
+            <h1 className="text-2xl font-bold text-white drop-shadow-sm">Proficia</h1>
+          )}
+          {isCollapsed && (
+            <div className="h-10 w-10 rounded-full bg-white text-blue-600 flex items-center justify-center font-bold text-xl shadow-md">
+              P
+            </div>
+          )}
+          
+          {/* Desktop Collapse Toggle */}
+          <button 
+            onClick={toggleCollapse}
+            className="hidden lg:flex items-center justify-center h-8 w-8 rounded-full bg-blue-300/30 text-white hover:bg-blue-300/50 transition-colors"
+            aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {isCollapsed ? <FiMenu size={18} /> : <FiX size={18} />}
+          </button>
+
+          {/* Mobile Close Button */}
+          {!isCollapsed && isMobileOpen && typeof window !== 'undefined' && window.innerWidth < 1024 && (
+            <button 
+              onClick={toggleMobileMenu}
+              className="lg:hidden flex items-center justify-center h-8 w-8 rounded-full bg-blue-300/30 text-white hover:bg-blue-300/50 transition-colors"
+              aria-label="Close navigation menu"
+            >
+              <FiX size={18} />
+            </button>
+          )}
+        </div>
+
+        {/* Navigation Links */}
+        <nav className="flex-1 py-6 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-transparent">
+          <ul className="space-y-2 px-3">
+            {navItems.map(({ href, label, icon }) => {
+              const isActive = pathname === href;
+              
+              return (
+                <li key={href}>
+                  <Link 
+                    href={href} 
+                    className={`
+                      relative flex items-center p-3 rounded-lg transition-all duration-200
+                      ${isCollapsed ? 'justify-center' : 'justify-start space-x-3'} 
+                      ${isActive 
+                        ? 'bg-white text-blue-600 shadow-md font-medium' 
+                        : 'text-white hover:bg-white/20'}
+                    `}
+                  >
+                    <span className={`transition-transform duration-200 ${!isCollapsed && isActive ? 'scale-110' : ''}`}>
+                      {icon}
+                    </span>
+                    {!isCollapsed && <span className="ml-3">{label}</span>}
+                    
+                    {/* Active indicator */}
+                    {isActive && (
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-1.5 bg-blue-500 rounded-l-full" />
+                    )}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+        
+        {/* Footer Area */}
+        <div className={`
+          p-4 mt-auto border-t border-blue-400/30 
+          ${isCollapsed ? 'text-center' : 'px-4'}
+        `}>
+          <button 
+            onClick={() => signOut({ callbackUrl: '/login' })}
+            className={`
+              py-2.5 rounded-lg font-medium transition-all duration-200
+              bg-white/90 text-red-600 hover:bg-white shadow-sm
+              ${isCollapsed ? 'w-12 h-12 flex items-center justify-center mx-auto' : 'w-full flex items-center justify-center gap-2'}
+            `}
+            title="Logout"
+          >
+            <FiLogOut size={18} />
+            {!isCollapsed && <span>Logout</span>}
+          </button>
+          
+          {!isCollapsed && (
+            <div className="mt-4 text-center text-sm text-white/70">
+              © 2025 Proficia
+            </div>
+          )}
+        </div>
+      </aside>
+    </>
   );
 };
 
