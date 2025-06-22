@@ -29,6 +29,7 @@ export default function PracticePage() {
   });
   const [isGenerating, setIsGenerating] = useState(false);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+  const [error, setError] = useState("");
   
   const router = useRouter();
 
@@ -61,6 +62,8 @@ export default function PracticePage() {
     if (!selectedTopic) return;
 
     setIsGenerating(true);
+    setError(""); // Clear any previous errors
+    
     try {
       const response = await fetch('/api/tests/generate', {
         method: 'POST',
@@ -72,12 +75,18 @@ export default function PracticePage() {
         const data = await response.json();
         router.push(`/tests/${data.test.id}`);
       } else {
-        const error = await response.json();
-        alert(error.error || 'Failed to generate test');
+        const errorData = await response.json();
+        
+        // Handle rate limiting specifically
+        if (response.status === 429) {
+          setError(errorData.message || "Daily test limit reached. You can only create 3 tests per day.");
+        } else {
+          setError(errorData.error || 'Failed to generate test');
+        }
       }
     } catch (error) {
       console.error('Error generating test:', error);
-      alert('Failed to generate test');
+      setError('Failed to generate test. Please try again later.');
     } finally {
       setIsGenerating(false);
     }
@@ -107,6 +116,13 @@ export default function PracticePage() {
             Choose a topic and customize your test to start practicing
           </p>
         </motion.div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded mb-6">
+            {error}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Topic Selection */}

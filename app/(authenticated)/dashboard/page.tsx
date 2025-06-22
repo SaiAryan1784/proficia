@@ -132,12 +132,19 @@ export default function DashboardPage() {
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.error || "Failed to generate test");
+        // Handle rate limiting specifically
+        if (response.status === 429) {
+          setError(data.message || "Daily test limit reached. You can only create 3 tests per day.");
+        } else {
+          setError(data.error || "Failed to generate test");
+        }
+        return;
       }
       
       // Redirect to the test page
       window.location.href = `/tests/${data.test.id}`;
-    } catch {
+    } catch (error) {
+      console.error('Test generation error:', error);
       setError("Error generating test. Please try again later.");
     } finally {
       setIsGenerating(false);
@@ -169,8 +176,10 @@ export default function DashboardPage() {
               <a 
                 href={`/profile/${session.user.username}`}
                 className="text-blue-600 dark:text-blue-400 hover:underline break-all"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                proficia.com/profile/{session.user.username}
+                proficia.vercel.app/profile/{session.user.username}
               </a>
             </p>
           )}

@@ -29,6 +29,36 @@ export async function POST(request: Request) {
       );
     }
 
+    // Check daily test limit (3 tests per day)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Start of today
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1); // Start of tomorrow
+
+    const testsToday = await prisma.test.count({
+      where: {
+        userId: user.id,
+        createdAt: {
+          gte: today,
+          lt: tomorrow
+        }
+      }
+    });
+
+    const DAILY_TEST_LIMIT = 3;
+    if (testsToday >= DAILY_TEST_LIMIT) {
+      return NextResponse.json(
+        { 
+          error: "Daily test limit reached", 
+          message: `You can only create ${DAILY_TEST_LIMIT} tests per day. You've created ${testsToday} tests today. Try again tomorrow.`,
+          testsCreated: testsToday,
+          limit: DAILY_TEST_LIMIT,
+          nextResetTime: tomorrow.toISOString()
+        },
+        { status: 429 } // Too Many Requests
+      );
+    }
+
     // Parse request body
     const { topicId, difficulty = "medium", questionCount = 10 } = await request.json();
 
