@@ -38,7 +38,7 @@ export const authOptions: NextAuthOptions = {
           }
         });
 
-        if (!user || !user.password) {
+        if (!user?.password) {
           return null;
         }
 
@@ -73,8 +73,9 @@ export const authOptions: NextAuthOptions = {
           const newUser = await prisma.users.create({
             data: {
               email: profile.email,
-              name: profile.name || "",
-              image: profile.image || "",
+              name: profile.name ?? "",
+              image: profile.image ?? "",
+              // Username will be set later via the username setup flow
             }
           });
           
@@ -129,12 +130,19 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.id as string;
+        session.user.username = token.username as string;
       }
       return session;
     },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        // Fetch username from database
+        const dbUser = await prisma.users.findUnique({
+          where: { id: user.id },
+          select: { username: true }
+        });
+        token.username = dbUser?.username ?? undefined;
       }
       return token;
     },

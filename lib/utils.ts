@@ -2,14 +2,15 @@
 import { hash } from "bcrypt";
 import { prisma } from "./db";
 
-export async function createUser(email: string, password: string, name?: string) {
+export async function createUser(email: string, password: string, name?: string, username?: string) {
   const hashedPassword = await hash(password, 10);
 
   return prisma.users.create({
     data: {
       email,
       password: hashedPassword,
-      name
+      name,
+      username
     }
   });
 }

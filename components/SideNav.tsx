@@ -4,6 +4,7 @@ import React, { useState, useEffect, FC } from 'react';
 import { FiHome, FiUser, FiMail, FiMenu, FiX, FiLogOut, FiBarChart2 } from 'react-icons/fi';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
+import DarkModeToggle from './DarkModeToggle';
 
 interface NavItem {
   href: string;
@@ -96,22 +97,23 @@ const SideNav: FC = () => {
       <aside
         className={`
           fixed top-0 left-0 h-full z-40 transition-all duration-300 ease-in-out
-          bg-gradient-to-b from-blue-400 to-purple-400
-          text-blue-900 shadow-xl flex flex-col
+          bg-white dark:bg-gradient-to-b dark:from-gray-800 dark:to-gray-900
+          border-r border-gray-200 dark:border-gray-700
+          text-gray-700 dark:text-gray-100 shadow-xl flex flex-col
           ${isCollapsed ? 'w-20' : 'w-64'}
           ${isSidebarVisible() ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
         {/* Logo Area */}
         <div className={`
-          p-5 border-b border-blue-400/30 flex items-center
+          p-5 border-b border-gray-200 dark:border-gray-700 flex items-center
           ${isCollapsed ? 'justify-center' : 'justify-between'}
         `}>
           {!isCollapsed && (
-            <h1 className="text-2xl font-bold text-white drop-shadow-sm">Proficia</h1>
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 drop-shadow-sm">Proficia</h1>
           )}
           {isCollapsed && (
-            <div className="h-10 w-10 rounded-full bg-white text-blue-600 flex items-center justify-center font-bold text-xl shadow-md">
+            <div className="h-10 w-10 rounded-full bg-blue-600 dark:bg-gray-700 text-white dark:text-blue-400 flex items-center justify-center font-bold text-xl shadow-md">
               P
             </div>
           )}
@@ -119,7 +121,7 @@ const SideNav: FC = () => {
           {/* Desktop Collapse Toggle */}
           <button 
             onClick={toggleCollapse}
-            className="hidden lg:flex items-center justify-center h-8 w-8 rounded-full bg-blue-300/30 text-white hover:bg-blue-300/50 transition-colors"
+            className="hidden lg:flex items-center justify-center h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-700/50 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600/50 transition-colors"
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {isCollapsed ? <FiMenu size={18} /> : <FiX size={18} />}
@@ -129,7 +131,7 @@ const SideNav: FC = () => {
           {!isCollapsed && isMobileOpen && typeof window !== 'undefined' && window.innerWidth < 1024 && (
             <button 
               onClick={toggleMobileMenu}
-              className="lg:hidden flex items-center justify-center h-8 w-8 rounded-full bg-blue-300/30 text-white hover:bg-blue-300/50 transition-colors"
+              className="lg:hidden flex items-center justify-center h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-700/50 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600/50 transition-colors"
               aria-label="Close navigation menu"
             >
               <FiX size={18} />
@@ -151,8 +153,8 @@ const SideNav: FC = () => {
                       relative flex items-center p-3 rounded-lg transition-all duration-200
                       ${isCollapsed ? 'justify-center' : 'justify-start space-x-3'} 
                       ${isActive 
-                        ? 'bg-white text-blue-600 shadow-md font-medium' 
-                        : 'text-white hover:bg-white/20'}
+                        ? 'bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-md font-medium border border-blue-200 dark:border-gray-600' 
+                        : 'text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700/50 hover:text-blue-600 dark:hover:text-blue-400'}
                     `}
                   >
                     <span className={`transition-transform duration-200 ${!isCollapsed && isActive ? 'scale-110' : ''}`}>
@@ -162,7 +164,7 @@ const SideNav: FC = () => {
                     
                     {/* Active indicator */}
                     {isActive && (
-                      <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-1.5 bg-blue-500 rounded-l-full" />
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-1.5 bg-blue-500 dark:bg-blue-400 rounded-l-full" />
                     )}
                   </Link>
                 </li>
@@ -173,14 +175,24 @@ const SideNav: FC = () => {
         
         {/* Footer Area */}
         <div className={`
-          p-4 mt-auto border-t border-blue-400/30 
+          p-4 mt-auto border-t border-gray-200 dark:border-gray-700 space-y-3
           ${isCollapsed ? 'text-center' : 'px-4'}
         `}>
+          {/* Dark Mode Toggle */}
+          <div className={`flex ${isCollapsed ? 'justify-center' : 'justify-start'}`}>
+            <DarkModeToggle 
+              size="sm" 
+              variant="button" 
+              showLabel={!isCollapsed}
+              className="w-full"
+            />
+          </div>
+          
           <button 
             onClick={() => signOut({ callbackUrl: '/login' })}
             className={`
               py-2.5 rounded-lg font-medium transition-all duration-200
-              bg-white/90 text-red-600 hover:bg-white shadow-sm
+              bg-red-50 dark:bg-gray-700 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-gray-600 shadow-sm border border-red-200 dark:border-gray-600
               ${isCollapsed ? 'w-12 h-12 flex items-center justify-center mx-auto' : 'w-full flex items-center justify-center gap-2'}
             `}
             title="Logout"
@@ -190,7 +202,7 @@ const SideNav: FC = () => {
           </button>
           
           {!isCollapsed && (
-            <div className="mt-4 text-center text-sm text-white/70">
+            <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
               © 2025 Proficia
             </div>
           )}

@@ -15,10 +15,12 @@ export default function ProfilePage() {
     name: "",
     email: "",
     image: "",
+    username: "",
   });
   const [editMode, setEditMode] = useState(false);
   const [editableData, setEditableData] = useState({
     name: "",
+    username: "",
   });
   const [passwordMode, setPasswordMode] = useState(false);
   const [passwordData, setPasswordData] = useState({
@@ -26,6 +28,8 @@ export default function ProfilePage() {
     newPassword: "",
     confirmPassword: "",
   });
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [checkingUsername, setCheckingUsername] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [error, setError] = useState("");
@@ -37,9 +41,11 @@ export default function ProfilePage() {
         name: session.user.name || "",
         email: session.user.email || "",
         image: session.user.image || "",
+        username: session.user.username || "",
       });
       setEditableData({
         name: session.user.name || "",
+        username: session.user.username || "",
       });
       setIsLoading(false);
     } else if (status === "unauthenticated") {
@@ -52,11 +58,35 @@ export default function ProfilePage() {
     setImageError(false);
   }, [userData.image]);
 
+  // Check username availability with debounce
+  useEffect(() => {
+    if (editableData.username.length >= 3 && editableData.username !== userData.username) {
+      const delayDebounceFn = setTimeout(async () => {
+        setCheckingUsername(true);
+        try {
+          const response = await fetch(`/api/user/check-username?username=${encodeURIComponent(editableData.username)}`);
+          const data = await response.json();
+          setUsernameAvailable(data.available);
+        } catch {
+          setUsernameAvailable(null);
+        } finally {
+          setCheckingUsername(false);
+        }
+      }, 500);
+
+      return () => clearTimeout(delayDebounceFn);
+    } else {
+      setUsernameAvailable(null);
+      setCheckingUsername(false);
+    }
+  }, [editableData.username, userData.username]);
+
   const handleEditModeToggle = () => {
     if (editMode) {
       // Discard changes and exit edit mode
       setEditableData({
         name: userData.name,
+        username: userData.username,
       });
     }
     setEditMode(!editMode);
@@ -79,10 +109,19 @@ export default function ProfilePage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setEditableData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    if (name === 'username') {
+      // Convert username to lowercase and remove invalid characters
+      const cleanValue = value.toLowerCase().replace(/[^a-z0-9_]/g, '');
+      setEditableData((prev) => ({
+        ...prev,
+        [name]: cleanValue,
+      }));
+    } else {
+      setEditableData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,6 +139,13 @@ export default function ProfilePage() {
     setSuccessMessage("");
 
     try {
+      // If username changed, check if it's available
+      if (editableData.username !== userData.username && usernameAvailable === false) {
+        setError("Username is not available");
+        setIsSaving(false);
+        return;
+      }
+
       const response = await fetch("/api/user/update-profile", {
         method: "POST",
         headers: {
@@ -107,6 +153,7 @@ export default function ProfilePage() {
         },
         body: JSON.stringify({
           name: editableData.name,
+          username: editableData.username,
         }),
       });
 
@@ -117,8 +164,10 @@ export default function ProfilePage() {
         setUserData((prev) => ({
           ...prev,
           name: editableData.name,
+          username: editableData.username,
         }));
         setSuccessMessage("Profile updated successfully!");
+                setSuccessMessage("Profile updated successfully!");
         setEditMode(false);
       } else {
         setError(data.message || "Failed to update profile");
@@ -190,28 +239,28 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto py-4 sm:py-6 md:py-8 px-4 sm:px-6">
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="max-w-3xl mx-auto py-4 sm:py-6 md:py-8 px-2 sm:px-4 lg:px-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
         <div className="bg-gradient-to-r from-blue-400 to-purple-500 px-4 sm:px-6 py-3 sm:py-4">
           <h1 className="text-xl sm:text-2xl font-bold text-white">Profile</h1>
         </div>
 
         <div className="p-4 sm:p-6">
           {successMessage && (
-            <div className="mb-4 sm:mb-6 bg-green-100 border border-green-400 text-green-700 px-3 sm:px-4 py-2 sm:py-3 rounded relative">
+            <div className="mb-4 sm:mb-6 bg-green-100 dark:bg-green-900/20 border border-green-400 dark:border-green-600 text-green-700 dark:text-green-400 px-3 sm:px-4 py-2 sm:py-3 rounded relative">
               {successMessage}
             </div>
           )}
 
           {error && (
-            <div className="mb-4 sm:mb-6 bg-red-100 border border-red-400 text-red-700 px-3 sm:px-4 py-2 sm:py-3 rounded relative">
+            <div className="mb-4 sm:mb-6 bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-400 px-3 sm:px-4 py-2 sm:py-3 rounded relative">
               {error}
             </div>
           )}
 
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
             <div className="flex flex-col items-center">
-              <div className="relative w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 mb-4 rounded-full overflow-hidden bg-gray-200">
+              <div className="relative w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 mb-4 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">{/* ...existing code... */}
                 {userData.image && !imageError ? (
                   <Image
                     src={userData.image}
@@ -249,10 +298,50 @@ export default function ProfilePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="username"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Username
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        value={editableData.username}
+                        onChange={handleChange}
+                        className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base pr-10"
+                      />
+                      {editableData.username.length >= 3 && editableData.username !== userData.username && (
+                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                          {checkingUsername ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                          ) : usernameAvailable === true ? (
+                            <span className="text-green-500">✓</span>
+                          ) : usernameAvailable === false ? (
+                            <span className="text-red-500">✗</span>
+                          ) : null}
+                        </div>
+                      )}
+                    </div>
+                    {editableData.username.length >= 3 && editableData.username !== userData.username && usernameAvailable === false && (
+                      <p className="mt-1 text-sm text-red-600">Username is already taken</p>
+                    )}
+                    {editableData.username.length >= 3 && editableData.username !== userData.username && usernameAvailable === true && (
+                      <p className="mt-1 text-sm text-green-600">Username is available</p>
+                    )}
+                    <p className="mt-1 text-xs text-gray-500">
+                      Your profile will be available at: proficia.com/profile/{editableData.username || 'username'}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label htmlFor="email-display" className="block text-sm font-medium text-gray-700 mb-1">
                       Email
                     </label>
                     <input
+                      id="email-display"
                       type="email"
                       value={userData.email}
                       disabled
@@ -383,6 +472,17 @@ export default function ProfilePage() {
                       <div>
                         <p className="text-sm font-medium text-gray-500">Name</p>
                         <p className="mt-1 text-base sm:text-lg">{userData.name || "-"}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-500">Username</p>
+                        <p className="mt-1 text-base sm:text-lg">@{userData.username || "Not set"}</p>
+                        {userData.username && (
+                          <p className="mt-1 text-sm text-gray-500">
+                            Profile URL: <a href={`/profile/${userData.username}`} className="text-blue-600 hover:underline">
+                              proficia.com/profile/{userData.username}
+                            </a>
+                          </p>
+                        )}
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-500">

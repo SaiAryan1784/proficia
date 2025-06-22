@@ -5,7 +5,8 @@ import { authOptions } from "@/lib/auth";
 
 export async function GET() {
   try {
-    // Get session data
+    // Get session data - just for debugging
+    // This is a server-side function, so we can use getServerSession
     const session = await getServerSession(authOptions);
     
     if (!session?.user) {

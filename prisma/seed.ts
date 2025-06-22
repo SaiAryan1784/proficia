@@ -9,31 +9,31 @@ async function main() {
       {
         name: 'JavaScript Fundamentals',
         description: 'Test your knowledge of JavaScript basics, including variables, functions, and control flow.',
-        imageUrl: 'https://via.placeholder.com/150?text=JS',
+        imageUrl: null,
         category: 'Programming',
       },
       {
         name: 'React Essentials',
         description: 'Test your understanding of React core concepts, including components, props, and state.',
-        imageUrl: 'https://via.placeholder.com/150?text=React',
+        imageUrl: null,
         category: 'Programming',
       },
       {
         name: 'Data Structures',
         description: 'Test your knowledge of fundamental data structures like arrays, linked lists, trees, and graphs.',
-        imageUrl: 'https://via.placeholder.com/150?text=DS',
+        imageUrl: null,
         category: 'Computer Science',
       },
       {
         name: 'Algorithms',
         description: 'Test your understanding of common algorithms and their complexity.',
-        imageUrl: 'https://via.placeholder.com/150?text=Algo',
+        imageUrl: null,
         category: 'Computer Science',
       },
       {
         name: 'SQL Basics',
         description: 'Test your knowledge of SQL queries and database concepts.',
-        imageUrl: 'https://via.placeholder.com/150?text=SQL',
+        imageUrl: null,
         category: 'Database',
       }
     ]

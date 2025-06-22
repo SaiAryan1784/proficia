@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     const userId = session.user.id;
 
     // Parse the request body
-    const { name } = await request.json();
+    const { name, username } = await request.json();
 
     // Validate input
     if (typeof name !== 'string' || name.trim().length === 0) {
@@ -30,15 +30,54 @@ export async function POST(request: Request) {
       );
     }
 
+    // Prepare update data
+    const updateData: { name: string; username?: string } = { name: name.trim() };
+
+    // If username is provided, validate and check availability
+    if (username !== undefined) {
+      if (typeof username !== 'string' || username.trim().length < 3) {
+        return NextResponse.json(
+          { message: "Username must be at least 3 characters long" },
+          { status: 400 }
+        );
+      }
+
+      const cleanUsername = username.toLowerCase().trim();
+      
+      // Validate username format
+      if (!/^[a-z0-9_]+$/.test(cleanUsername)) {
+        return NextResponse.json(
+          { message: "Username can only contain lowercase letters, numbers, and underscores" },
+          { status: 400 }
+        );
+      }
+
+      // Check if username is already taken by another user
+      const existingUser = await prisma.users.findUnique({
+        where: { username: cleanUsername },
+        select: { id: true }
+      });
+
+      if (existingUser && existingUser.id !== userId) {
+        return NextResponse.json(
+          { message: "Username is already taken" },
+          { status: 409 }
+        );
+      }
+
+      updateData.username = cleanUsername;
+    }
+
     // Update the user in the database
     const updatedUser = await prisma.users.update({
       where: { id: userId },
-      data: { name: name.trim() },
+      data: updateData,
       select: {
         id: true,
         name: true,
         email: true,
         image: true,
+        username: true,
       },
     });
 

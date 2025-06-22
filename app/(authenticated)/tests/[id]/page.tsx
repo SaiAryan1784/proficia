@@ -27,6 +27,7 @@ interface Test {
   questions: Question[];
   startedAt: string | null;
   completedAt: string | null;
+  timeLimit?: number; // in minutes
 }
 
 // Page is now a Server Component that receives params
@@ -61,6 +62,7 @@ export default async function TestPage(props: { params: Promise<{ id: string }> 
     description: test.description,
     status: test.status,
     score: test.score,
+    timeLimit: test.timeLimit ?? undefined,
     startedAt: test.startedAt?.toISOString() || null,
     completedAt: test.completedAt?.toISOString() || null,
     questions: test.questions.map(q => ({

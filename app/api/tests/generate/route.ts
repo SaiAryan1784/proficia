@@ -39,6 +39,9 @@ export async function POST(request: Request) {
       );
     }
 
+    // Automatically set time limit: 1 minute per question
+    const timeLimit = Number(questionCount);
+
     // Fetch the topic
     const topic = await prisma.topic.findUnique({
       where: { id: topicId }
@@ -72,6 +75,7 @@ export async function POST(request: Request) {
         userId: user.id,
         topicId: topic.id,
         status: "DRAFT",
+        timeLimit: timeLimit ? Number(timeLimit) : Number(questionCount),
         questions: {
           create: testContent.questions.map(q => ({
             text: q.text,

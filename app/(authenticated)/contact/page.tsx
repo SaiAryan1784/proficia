@@ -29,17 +29,11 @@ const cardVariants = {
   hidden: { y: 50, opacity: 0 },
   visible: { 
     y: 0, 
-    opacity: 1,
-    transition: { 
-      type: "spring", 
-      stiffness: 100,
-      damping: 15
-    }
+    opacity: 1
   },
   hover: { 
     y: -5,
-    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-    transition: { duration: 0.3 }
+    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
   }
 };
 
@@ -47,12 +41,7 @@ const formItemVariants = {
   hidden: { opacity: 0, x: -20 },
   visible: { 
     opacity: 1, 
-    x: 0,
-    transition: { 
-      type: "spring", 
-      stiffness: 100,
-      damping: 15
-    }
+    x: 0
   }
 };
 
@@ -60,10 +49,7 @@ const iconVariants = {
   hover: { 
     scale: 1.2,
     y: -3,
-    color: "#6366F1",
-    transition: {
-      duration: 0.2
-    }
+    color: "#6366F1"
   },
   tap: {
     scale: 0.9
@@ -84,11 +70,7 @@ const textVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      ease: "easeOut"
-    }
+    y: 0
   }
 };
 
@@ -107,12 +89,7 @@ const letterVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
-    y: 0,
-    transition: {
-      type: "spring",
-      damping: 12,
-      stiffness: 200
-    }
+    y: 0
   }
 };
 
@@ -169,7 +146,7 @@ export default function ContactPage() {
           variants={titleVariants}
         >
           {titleLetters.map((letter, index) => (
-            <motion.span key={index} variants={letterVariants}>
+            <motion.span key={`title-letter-${index}-${letter}`} variants={letterVariants}>
               {letter === " " ? "\u00A0" : letter}
             </motion.span>
           ))}
