@@ -21,7 +21,7 @@ export default function RegisterPage() {
 
   // Check username availability with debounce
   useEffect(() => {
-    if (username.length >= 3) {
+    if (username.length >= 3 && username.length <= 20) {
       const delayDebounceFn = setTimeout(async () => {
         setCheckingUsername(true);
         try {
@@ -53,6 +53,16 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (username.length < 3 || username.length > 20) {
+      setError("Username must be between 3 and 20 characters");
+      return;
+    }
+    
+    if (password.length < 8 || password.length > 100) {
+      setError("Password must be between 8 and 100 characters");
+      return;
+    }
     
     if (!usernameAvailable) {
       setError("Please choose an available username");
@@ -178,13 +188,16 @@ export default function RegisterPage() {
                     placeholder="Choose a unique username"
                     value={username}
                     required
+                    maxLength={20}
                     onChange={(e) => {
                       const cleanValue = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '');
-                      setUsername(cleanValue);
+                      if (cleanValue.length <= 20) {
+                        setUsername(cleanValue);
+                      }
                     }}
                     className="mt-1 block w-full px-3 py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm pr-10"
                   />
-                  {username.length >= 3 && (
+                  {username.length >= 3 && username.length <= 20 && (
                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                       {checkingUsername ? (
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-500"></div>
@@ -196,14 +209,18 @@ export default function RegisterPage() {
                     </div>
                   )}
                 </div>
-                {username.length >= 3 && usernameAvailable === false && (
+                {username.length > 20 && (
+                  <p className="mt-1 text-sm text-red-600">Username cannot exceed 20 characters</p>
+                )}
+                {username.length >= 3 && username.length <= 20 && usernameAvailable === false && (
                   <p className="mt-1 text-sm text-red-600">Username is already taken</p>
                 )}
-                {username.length >= 3 && usernameAvailable === true && (
+                {username.length >= 3 && username.length <= 20 && usernameAvailable === true && (
                   <p className="mt-1 text-sm text-green-600">Username is available</p>
                 )}
                 <p className="mt-1 text-xs text-gray-500">
-                  Username must be at least 3 characters. Only lowercase letters, numbers, and underscores allowed.
+                  3-20 characters. Only lowercase letters, numbers, and underscores.
+                  <span className="ml-2 text-gray-400">({username.length}/20)</span>
                 </p>
               </motion.div>
               
@@ -237,12 +254,24 @@ export default function RegisterPage() {
                 <input
                   id="password"
                   type="password"
-                  placeholder="Create a password"
+                  placeholder="Create a password (8-100 characters)"
                   value={password}
+                  maxLength={100}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  minLength={8}
                   className="mt-1 block w-full px-3 py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  Password must be 8-100 characters long.
+                  <span className="ml-2 text-gray-400">({password.length}/100)</span>
+                </p>
+                {password.length > 0 && password.length < 8 && (
+                  <p className="mt-1 text-sm text-red-600">Password must be at least 8 characters</p>
+                )}
+                {password.length > 100 && (
+                  <p className="mt-1 text-sm text-red-600">Password cannot exceed 100 characters</p>
+                )}
               </motion.div>
             </div>
             

@@ -32,7 +32,7 @@ export default function UsernameSetupPage() {
 
   // Check username availability with debounce
   useEffect(() => {
-    if (username.length >= 3) {
+    if (username.length >= 3 && username.length <= 20) {
       const delayDebounceFn = setTimeout(async () => {
         setCheckingUsername(true);
         try {
@@ -56,6 +56,11 @@ export default function UsernameSetupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (username.length < 3 || username.length > 20) {
+      setError("Username must be between 3 and 20 characters");
+      return;
+    }
     
     if (!usernameAvailable) {
       setError("Please choose an available username");
@@ -144,10 +149,16 @@ export default function UsernameSetupPage() {
                 placeholder="Choose a unique username"
                 value={username}
                 required
-                onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                maxLength={20}
+                onChange={(e) => {
+                  const value = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '');
+                  if (value.length <= 20) {
+                    setUsername(value);
+                  }
+                }}
                 className="mt-1 block w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white text-sm sm:text-base pr-10"
               />
-              {username.length >= 3 && (
+              {username.length >= 3 && username.length <= 20 && (
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                   {(() => {
                     if (checkingUsername) {
@@ -164,14 +175,18 @@ export default function UsernameSetupPage() {
                 </div>
               )}
             </div>
-            {username.length >= 3 && usernameAvailable === false && (
+            {username.length > 20 && (
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">Username cannot exceed 20 characters</p>
+            )}
+            {username.length >= 3 && username.length <= 20 && usernameAvailable === false && (
               <p className="mt-1 text-sm text-red-600 dark:text-red-400">Username is already taken</p>
             )}
-            {username.length >= 3 && usernameAvailable === true && (
+            {username.length >= 3 && username.length <= 20 && usernameAvailable === true && (
               <p className="mt-1 text-sm text-green-600 dark:text-green-400">Username is available</p>
             )}
             <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              Username must be at least 3 characters. Only lowercase letters, numbers, and underscores allowed.
+              Username must be 3-20 characters. Only lowercase letters, numbers, and underscores allowed.
+              <span className="ml-2 text-gray-400">({username.length}/20)</span>
             </p>
           </motion.div>
           

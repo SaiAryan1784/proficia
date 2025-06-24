@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 interface UseNavigationGuardOptions {
   enabled: boolean;
@@ -10,9 +10,8 @@ interface UseNavigationGuardOptions {
 
 export function useNavigationGuard({ enabled, onNavigationAttempt }: UseNavigationGuardOptions) {
   const router = useRouter();
-  const pathname = usePathname();
   const isGuardEnabled = useRef(false);
-  const originalPush = useRef<typeof router.push>();
+  const originalPush = useRef<typeof router.push | undefined>(undefined);
 
   useEffect(() => {
     isGuardEnabled.current = enabled;
@@ -27,7 +26,7 @@ export function useNavigationGuard({ enabled, onNavigationAttempt }: UseNavigati
     }
 
     // Override router.push to intercept programmatic navigation
-    const interceptPush = (href: string, options?: any) => {
+    const interceptPush = (href: string, options?: { scroll?: boolean }) => {
       if (isGuardEnabled.current) {
         onNavigationAttempt();
         return Promise.resolve(true);
@@ -36,7 +35,7 @@ export function useNavigationGuard({ enabled, onNavigationAttempt }: UseNavigati
     };
 
     // Type assertion to override the method
-    (router as any).push = interceptPush;
+    (router as typeof router & { push: typeof interceptPush }).push = interceptPush;
 
     // Handle browser navigation (back/forward buttons)
     const handlePopState = (e: PopStateEvent) => {
@@ -65,7 +64,7 @@ export function useNavigationGuard({ enabled, onNavigationAttempt }: UseNavigati
     return () => {
       // Restore original router.push
       if (originalPush.current) {
-        (router as any).push = originalPush.current;
+        (router as typeof router & { push: typeof originalPush.current }).push = originalPush.current;
       }
       
       window.removeEventListener('popstate', handlePopState);
