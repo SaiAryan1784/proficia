@@ -20,6 +20,19 @@ export function useTimer(initialTimeInMinutes?: number) {
   
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const initialTimeRef = useRef(initialTimeInMinutes ? initialTimeInMinutes * 60 : 0);
+  const isMountedRef = useRef(true);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, []);
 
   const start = useCallback(() => {
     setState(prev => ({ ...prev, isRunning: true }));
@@ -47,6 +60,11 @@ export function useTimer(initialTimeInMinutes?: number) {
   useEffect(() => {
     if (state.isRunning && !state.isExpired) {
       intervalRef.current = setInterval(() => {
+        // Check if component is still mounted before updating state
+        if (!isMountedRef.current) {
+          return;
+        }
+        
         setState(prev => {
           const newTimeSpent = prev.timeSpent + 1;
           const newTimeRemaining = initialTimeInMinutes 

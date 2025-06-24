@@ -96,7 +96,7 @@ export default function RegisterPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="w-full max-w-sm sm:max-w-md p-6 sm:p-8 space-y-6 sm:space-y-8 bg-white rounded-lg shadow-lg"
+          className="w-full max-w-sm mx-auto p-6 sm:p-8 space-y-6 bg-white rounded-lg shadow-lg"
         >
           <div className="text-center">
             <motion.h1 
@@ -126,7 +126,7 @@ export default function RegisterPage() {
             <button
               onClick={handleGoogleSignIn}
               disabled={isLoading}
-              className="flex items-center justify-center w-full py-3 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+              className="flex items-center justify-center w-full max-w-xs mx-auto py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
             >
               <FaGoogle className="mr-2 text-red-500" />
               Sign up with Google
@@ -142,8 +142,8 @@ export default function RegisterPage() {
             </div>
           </motion.div>
           
-          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-            <div className="space-y-3 sm:space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-4">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -159,7 +159,7 @@ export default function RegisterPage() {
                   value={name}
                   required
                   onChange={(e) => setName(e.target.value)}
-                  className="mt-1 block w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base"
+                  className="mt-1 block w-full px-3 py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                 />
               </motion.div>
               
@@ -182,7 +182,7 @@ export default function RegisterPage() {
                       const cleanValue = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '');
                       setUsername(cleanValue);
                     }}
-                    className="mt-1 block w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base pr-10"
+                    className="mt-1 block w-full px-3 py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm pr-10"
                   />
                   {username.length >= 3 && (
                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
@@ -222,7 +222,7 @@ export default function RegisterPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="mt-1 block w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base"
+                  className="mt-1 block w-full px-3 py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                 />
               </motion.div>
               
@@ -241,7 +241,7 @@ export default function RegisterPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="mt-1 block w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base"
+                  className="mt-1 block w-full px-3 py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                 />
               </motion.div>
             </div>
@@ -252,7 +252,7 @@ export default function RegisterPage() {
               transition={{ delay: 0.9 }}
               className="pt-2 flex flex-col items-center"
             >
-              <div className="w-full">
+              <div className="w-full max-w-xs mx-auto">
                 <ButtonPrimary 
                   text={isLoading ? "Loading..." : "Register"} 
                   type="submit" 

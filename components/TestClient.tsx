@@ -59,6 +59,7 @@ export default function TestClient({ test }: TestClientProps) {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [gamificationResult, setGamificationResult] = useState<GamificationResult | null>(null);
+  const [showExitConfirmation, setShowExitConfirmation] = useState(false);
   
   const timer = useTimer(test.timeLimit);
 
@@ -110,6 +111,52 @@ export default function TestClient({ test }: TestClientProps) {
       handleSubmit(true);
     }
   }, [timer.isExpired, showResults, isSubmitting, handleSubmit]);
+
+  // Handle page exit attempts during active test
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // Only show warning if test is in progress and not completed
+      if (!showResults && test.status !== "COMPLETED") {
+        e.preventDefault();
+        e.returnValue = "You have an ongoing test. Are you sure you want to leave? Your progress will be lost.";
+        return e.returnValue;
+      }
+    };
+
+    const handlePopState = (e: PopStateEvent) => {
+      // Handle browser back button
+      if (!showResults && test.status !== "COMPLETED") {
+        e.preventDefault();
+        setShowExitConfirmation(true);
+        // Push the current state back to prevent navigation
+        window.history.pushState(null, "", window.location.href);
+      }
+    };
+
+    // Add event listeners only during active test
+    if (!showResults && test.status !== "COMPLETED") {
+      window.addEventListener("beforeunload", handleBeforeUnload);
+      window.addEventListener("popstate", handlePopState);
+      
+      // Push initial state to handle back button
+      window.history.pushState(null, "", window.location.href);
+    }
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [showResults, test.status]);
+
+  const handleExitConfirm = async () => {
+    setShowExitConfirmation(false);
+    await handleSubmit(false); // Submit current answers
+    router.push("/dashboard");
+  };
+
+  const handleExitCancel = () => {
+    setShowExitConfirmation(false);
+  };
 
   const handleAnswerChange = (questionId: string, answer: string) => {
     setUserAnswers((prev) => ({
@@ -324,6 +371,48 @@ export default function TestClient({ test }: TestClientProps) {
   const currentQuestion = test.questions[currentQuestionIndex];
 
   return (
+    <>
+      {/* Exit Confirmation Modal */}
+      <AnimatePresence>
+        {showExitConfirmation && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6"
+            >
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Submit Test and Exit?
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                You have an ongoing test. Do you want to submit your current answers and exit? 
+                Your progress will be saved and you can review your results.
+              </p>
+              <div className="flex space-x-3 justify-end">
+                <button
+                  onClick={handleExitCancel}
+                  className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleExitConfirm}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition-colors"
+                >
+                  Submit Test
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-8">
         {/* Header with Timer and Progress */}
@@ -535,5 +624,6 @@ export default function TestClient({ test }: TestClientProps) {
         </div>
       </div>
     </div>
+    </>
   );
 }

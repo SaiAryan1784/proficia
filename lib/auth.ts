@@ -129,12 +129,12 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (token && session.user) {
-        session.user.id = token.id as string;
-        session.user.username = token.username as string;
+        session.user.id = token.id;
+        session.user.username = token.username;
       }
       return session;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id;
         // Fetch username from database
@@ -144,6 +144,22 @@ export const authOptions: NextAuthOptions = {
         });
         token.username = dbUser?.username ?? undefined;
       }
+      
+      // Handle session update trigger (when update() is called)
+      if (trigger === "update") {
+        // Refetch user data from database
+        const dbUser = await prisma.users.findUnique({
+          where: { id: token.id },
+          select: { username: true, name: true, email: true }
+        });
+        
+        if (dbUser) {
+          token.username = dbUser.username ?? undefined;
+          token.name = dbUser.name;
+          token.email = dbUser.email;
+        }
+      }
+      
       return token;
     },
     async redirect({ url, baseUrl }) {

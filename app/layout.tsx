@@ -2,7 +2,7 @@
 import type { Metadata } from "next";
 import { Syne } from "next/font/google";
 import AuthProvider from "@/components/SessionProvider";
-import { ThemeProvider } from "@/contexts/ThemeContext-new";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import "./globals.css";
 import RouteLoader from "@/components/RouteLoader";
 

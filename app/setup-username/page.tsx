@@ -35,12 +35,9 @@ export default function UsernameSetupPage() {
     if (username.length >= 3) {
       const delayDebounceFn = setTimeout(async () => {
         setCheckingUsername(true);
-        console.log('Checking username availability for:', username);
         try {
           const response = await fetch(`/api/user/check-username?username=${encodeURIComponent(username)}`);
-          console.log('Response status:', response.status);
           const data = await response.json();
-          console.log('Response data:', data);
           setUsernameAvailable(data.available);
         } catch (error) {
           console.error('Error checking username:', error);
@@ -78,11 +75,12 @@ export default function UsernameSetupPage() {
       });
       
       if (response.ok) {
-        // Update the session. The useEffect hook will handle the redirect.
-        await update();
+        // Update the session in the background and redirect immediately
+        update().catch(console.error);
+        router.push("/dashboard");
       } else {
         const data = await response.json();
-        setError(data.error || "Failed to set username");
+        setError(data.error ?? "Failed to set username");
         setIsLoading(false);
       }
     } catch {
@@ -151,13 +149,18 @@ export default function UsernameSetupPage() {
               />
               {username.length >= 3 && (
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                  {checkingUsername ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-                  ) : usernameAvailable === true ? (
-                    <FaCheck className="h-4 w-4 text-green-500" />
-                  ) : usernameAvailable === false ? (
-                    <FaTimes className="h-4 w-4 text-red-500" />
-                  ) : null}
+                  {(() => {
+                    if (checkingUsername) {
+                      return <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>;
+                    }
+                    if (usernameAvailable === true) {
+                      return <FaCheck className="h-4 w-4 text-green-500" />;
+                    }
+                    if (usernameAvailable === false) {
+                      return <FaTimes className="h-4 w-4 text-red-500" />;
+                    }
+                    return null;
+                  })()}
                 </div>
               )}
             </div>
@@ -170,10 +173,6 @@ export default function UsernameSetupPage() {
             <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
               Username must be at least 3 characters. Only lowercase letters, numbers, and underscores allowed.
             </p>
-            {/* Debug info - remove in production */}
-            <div className="mt-2 text-xs text-gray-400">
-              Debug: username={username}, length={username.length}, available={String(usernameAvailable)}, checking={String(checkingUsername)}
-            </div>
           </motion.div>
           
           {error && (

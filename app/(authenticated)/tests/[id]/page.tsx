@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import TestClient from "@/components/TestClient";
+import TestClient from "@/components/TestClientNew";
 
 type QuestionType = "MULTIPLE_CHOICE" | "TEXT" | "TRUE_FALSE";
 type TestStatus = "DRAFT" | "IN_PROGRESS" | "COMPLETED";

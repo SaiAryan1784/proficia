@@ -117,6 +117,13 @@ export default function PracticePage() {
           </p>
         </motion.div>
 
+        {/* Error Display */}
+        {error && (
+          <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded mb-6">
+            {error}
+          </div>
+        )}
+
         {/* Error Message */}
         {error && (
           <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded mb-6">
@@ -125,6 +132,15 @@ export default function PracticePage() {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Error Display */}
+          {error && (
+            <div className="lg:col-span-3 mb-6">
+              <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded">
+                {error}
+              </div>
+            </div>
+          )}
+
           {/* Topic Selection */}
           <div className="lg:col-span-2">
             <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
@@ -196,10 +212,10 @@ export default function PracticePage() {
               <div className="space-y-4">
                 {/* Difficulty */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor="difficulty-selection" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Difficulty
                   </label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-2" id="difficulty-selection">
                     {(['easy', 'medium', 'hard'] as const).map((difficulty) => (
                       <button
                         key={difficulty}
@@ -218,10 +234,11 @@ export default function PracticePage() {
 
                 {/* Question Count */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor="question-count" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Number of Questions
                   </label>
                   <select
+                    id="question-count"
                     value={testConfig.questionCount}
                     onChange={(e) => setTestConfig(prev => ({ ...prev, questionCount: Number(e.target.value) }))}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Timer from "./Timer";
@@ -55,47 +55,16 @@ export default function TestClient({ test }: TestClientProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
   const [showResults, setShowResults] = useState(test.status === "COMPLETED");
-  const [totalScore, setTotalScore] = useState(test.score || 0);
+  const [totalScore, setTotalScore] = useState(test.score ?? 0);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [gamificationResult, setGamificationResult] = useState<GamificationResult | null>(null);
+  const [showExitConfirmation, setShowExitConfirmation] = useState(false);
+  const [testStatus, setTestStatus] = useState<TestStatus>(test.status);
   
   const timer = useTimer(test.timeLimit);
 
-  // Auto-submit when time expires
-  useEffect(() => {
-    if (timer.isExpired && !showResults && !isSubmitting) {
-      handleSubmit(true);
-    }
-  }, [timer.isExpired, showResults, isSubmitting]);
-
-  // Auto-start timer when test begins
-  useEffect(() => {
-    if (test.status !== "COMPLETED" && test.timeLimit) {
-      timer.start();
-    }
-  }, [test.status, test.timeLimit, timer]);
-
-  const handleAnswerChange = (questionId: string, answer: string) => {
-    setUserAnswers((prev) => ({
-      ...prev,
-      [questionId]: answer,
-    }));
-  };
-
-  const handleNextQuestion = () => {
-    if (currentQuestionIndex < test.questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-    }
-  };
-
-  const handlePreviousQuestion = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(currentQuestionIndex - 1);
-    }
-  };
-
-  const handleSubmit = async (isAutoSubmit = false) => {
+  const handleSubmit = useCallback(async (isAutoSubmit = false) => {
     if (isSubmitting) return;
     
     setIsSubmitting(true);
@@ -134,6 +103,101 @@ export default function TestClient({ test }: TestClientProps) {
       setError(error instanceof Error ? error.message : "An unknown error occurred.");
     } finally {
       setIsSubmitting(false);
+    }
+  }, [isSubmitting, timer, test, userAnswers]);
+
+  // Auto-submit when time expires
+  useEffect(() => {
+    if (timer.isExpired && !showResults && !isSubmitting) {
+      handleSubmit(true);
+    }
+  }, [timer.isExpired, showResults, isSubmitting, handleSubmit]);
+
+  // Auto-start timer when test begins
+  useEffect(() => {
+    if (testStatus !== "COMPLETED" && test.timeLimit && !timer.isRunning) {
+      timer.start();
+    }
+  }, [testStatus, test.timeLimit, timer.isRunning, timer.start]);
+
+  // Handle page exit attempts during active test
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // Only show warning if test is in progress and not completed
+      if (!showResults && testStatus !== "COMPLETED") {
+        e.preventDefault();
+        return '';
+      }
+    };
+
+    // Add event listener only during active test
+    if (!showResults && testStatus !== "COMPLETED") {
+      window.addEventListener("beforeunload", handleBeforeUnload);
+    }
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [showResults, testStatus]);
+
+  // Start the test automatically when component mounts
+  useEffect(() => {
+    const startTest = async () => {
+      if (test.status === "DRAFT") {
+        try {
+          const response = await fetch(`/api/tests/${test.id}`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              status: "IN_PROGRESS",
+              startedAt: new Date().toISOString(),
+            }),
+          });
+          
+          if (response.ok) {
+            // Update the test status locally
+            setTestStatus("IN_PROGRESS");
+          }
+        } catch (error) {
+          console.error("Error starting test:", error);
+        }
+      } else if (test.status === "IN_PROGRESS") {
+        // If test is already in progress, update local state
+        setTestStatus("IN_PROGRESS");
+      }
+    };
+
+    startTest();
+  }, [test.id, test.status]);
+
+  const handleExitConfirm = async () => {
+    setShowExitConfirmation(false);
+    await handleSubmit(false); // Submit current answers
+    router.push("/dashboard");
+  };
+
+  const handleExitCancel = () => {
+    setShowExitConfirmation(false);
+  };
+
+  const handleAnswerChange = (questionId: string, answer: string) => {
+    setUserAnswers((prev) => ({
+      ...prev,
+      [questionId]: answer,
+    }));
+  };
+
+  const handleNextQuestion = () => {
+    if (currentQuestionIndex < test.questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    }
+  };
+
+  const handlePreviousQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
     }
   };
 
@@ -331,6 +395,48 @@ export default function TestClient({ test }: TestClientProps) {
   const currentQuestion = test.questions[currentQuestionIndex];
 
   return (
+    <>
+      {/* Exit Confirmation Modal */}
+      <AnimatePresence>
+        {showExitConfirmation && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6"
+            >
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Submit Test and Exit?
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                You have an ongoing test. Do you want to submit your current answers and exit? 
+                Your progress will be saved and you can review your results.
+              </p>
+              <div className="flex space-x-3 justify-end">
+                <button
+                  onClick={handleExitCancel}
+                  className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleExitConfirm}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition-colors"
+                >
+                  Submit Test
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-8">
         {/* Header with Timer and Progress */}
@@ -345,15 +451,26 @@ export default function TestClient({ test }: TestClientProps) {
               </p>
             </div>
             
-            {test.timeLimit && (
-              <div className="mt-4 md:mt-0">
+            <div className="mt-4 md:mt-0 flex items-center space-x-4">
+              {/* Test button for exit confirmation - Remove in production */}
+              {!showResults && testStatus !== "COMPLETED" && (
+                <button
+                  onClick={() => setShowExitConfirmation(true)}
+                  className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded transition-colors"
+                  title="Test exit confirmation (Remove in production)"
+                >
+                  Test Exit
+                </button>
+              )}
+              
+              {test.timeLimit && (
                 <Timer 
                   timeLimit={test.timeLimit}
                   onTimeUp={() => handleSubmit(true)}
                   autoStart={true}
                 />
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Progress Bar */}
@@ -532,5 +649,6 @@ export default function TestClient({ test }: TestClientProps) {
         </div>
       </div>
     </div>
+    </>
   );
 }

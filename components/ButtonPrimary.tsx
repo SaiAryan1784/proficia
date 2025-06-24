@@ -23,19 +23,20 @@ const ButtonPrimary: React.FC<ButtonPrimaryProps> = ({
         className={`
           cursor-pointer 
           bg-gradient-to-r from-blue-600 via-purple-500 to-indigo-400 
-          rounded-[50px] 
+          rounded-lg 
           inline-flex justify-center items-center 
           text-white
+          font-medium
           transition-all duration-300
           
-          /* Responsive sizing */
-          px-6 py-3 text-base sm:px-8 sm:py-4 sm:text-lg md:px-10 md:py-5 md:text-xl
-          w-full sm:w-auto min-w-[200px] md:min-w-[250px]
+          /* Responsive sizing - smaller and more reasonable */
+          px-4 py-2.5 text-sm sm:px-6 sm:py-3 sm:text-base
+          w-full max-w-xs
           
           /* States */
           ${disabled 
             ? 'opacity-70 cursor-not-allowed' 
-            : 'hover:scale-105 hover:shadow-lg hover:shadow-indigo-500/50 active:scale-95'}
+            : 'hover:shadow-md hover:shadow-indigo-500/25 active:scale-[0.98]'}
           
           /* Custom classes */
           ${className}

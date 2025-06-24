@@ -77,3 +77,65 @@ export async function GET(
     );
   }
 }
+
+export async function PATCH(
+  request: Request, 
+  { params }: { params: Promise<{ id: string }> }
+) {
+  // Await the params to get the id
+  const { id } = await params;
+  
+  try {
+    // Check authentication
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+    
+    const { status, startedAt } = await request.json();
+    
+    // Get test ID from params
+    const testId = id;
+    
+    // Fetch the test to verify ownership
+    const test = await prisma.test.findUnique({
+      where: { id: testId },
+      select: { userId: true, status: true }
+    });
+    
+    if (!test) {
+      return NextResponse.json(
+        { error: "Test not found" },
+        { status: 404 }
+      );
+    }
+    
+    // Check if the test belongs to the current user
+    if (test.userId !== session.user.id) {
+      return NextResponse.json(
+        { error: "Unauthorized access to this test" },
+        { status: 403 }
+      );
+    }
+    
+    // Update the test status
+    const updatedTest = await prisma.test.update({
+      where: { id: testId },
+      data: {
+        ...(status && { status }),
+        ...(startedAt && { startedAt: new Date(startedAt) }),
+      }
+    });
+    
+    return NextResponse.json({ success: true, test: updatedTest });
+  } catch (error) {
+    console.error('Error updating test:', error);
+    return NextResponse.json(
+      { error: "Failed to update test" },
+      { status: 500 }
+    );
+  }
+}
