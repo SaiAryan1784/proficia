@@ -59,8 +59,8 @@ export default function RegisterPage() {
       return;
     }
     
-    if (password.length < 8 || password.length > 100) {
-      setError("Password must be between 8 and 100 characters");
+    if (password.length < 8 || password.length > 16) {
+      setError("Password must be between 8 and 16 characters");
       return;
     }
     
@@ -254,23 +254,23 @@ export default function RegisterPage() {
                 <input
                   id="password"
                   type="password"
-                  placeholder="Create a password (8-100 characters)"
+                  placeholder="Create a password (8-16 characters)"
                   value={password}
-                  maxLength={100}
-                  onChange={(e) => setPassword(e.target.value)}
+                  maxLength={16}
+                  onChange={(e) => setPassword(e.target.value.replace(/\n/g, ''))}
                   required
                   minLength={8}
                   className="mt-1 block w-full px-3 py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Password must be 8-100 characters long.
-                  <span className="ml-2 text-gray-400">({password.length}/100)</span>
+                  Password must be 8-16 characters long.
+                  <span className="ml-2 text-gray-400">({password.length}/16)</span>
                 </p>
                 {password.length > 0 && password.length < 8 && (
                   <p className="mt-1 text-sm text-red-600">Password must be at least 8 characters</p>
                 )}
-                {password.length > 100 && (
-                  <p className="mt-1 text-sm text-red-600">Password cannot exceed 100 characters</p>
+                {password.length > 16 && (
+                  <p className="mt-1 text-sm text-red-600">Password cannot exceed 16 characters</p>
                 )}
               </motion.div>
             </div>
