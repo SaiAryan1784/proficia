@@ -230,7 +230,7 @@ export default async function TopicPage({ params }: TopicPageProps) {
         <section className="mb-12">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 border border-gray-200 dark:border-gray-700">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-              What You'll Learn
+              What You&apos;ll Learn
             </h2>
             <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
               {topic.longDescription}
@@ -240,7 +240,7 @@ export default async function TopicPage({ params }: TopicPageProps) {
               {/* Skills */}
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                  Skills You'll Master
+                  Skills You&apos;ll Master
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {topic.skills.map((skill, index) => (

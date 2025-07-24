@@ -53,7 +53,7 @@ export function generateMetadata({
     openGraph: {
       title: fullTitle,
       description,
-      type: ogType as any,
+      type: ogType as 'website' | 'article',
       url: fullCanonical,
       siteName: 'Proficia',
       images: [
@@ -98,7 +98,7 @@ export function generateTopicMetadata(topicName: string, description?: string) {
 }
 
 // Profile metadata generator
-export function generateProfileMetadata(username: string, name?: string, stats?: any) {
+export function generateProfileMetadata(username: string, name?: string, stats?: { level: number; totalTests: number; badges?: object[] }) {
   const displayName = name || username;
   const achievementsText = stats ? `Level ${stats.level} • ${stats.totalTests} tests completed • ${stats.badges?.length || 0} badges earned` : '';
   

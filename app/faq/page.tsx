@@ -40,7 +40,7 @@ export default async function FAQPage() {
             Frequently Asked Questions
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-            Find answers to common questions about Proficia's AI-powered learning platform
+            Find answers to common questions about Proficia&apos;s AI-powered learning platform
           </p>
         </header>
 
@@ -79,7 +79,7 @@ export default async function FAQPage() {
               Still have questions?
             </h2>
             <p className="text-gray-600 dark:text-gray-300 mb-6">
-              We're here to help! Reach out to our support team for personalized assistance.
+              We&apos;re here to help! Reach out to our support team for personalized assistance.
             </p>
             <a 
               href="/contact" 
