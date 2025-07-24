@@ -35,6 +35,10 @@ export default function RootLayout({
             __html: JSON.stringify(organizationSchema),
           }}
         />
+        <meta
+          name="google-site-verification"
+          content="MDnPPyr0B4WDN_cmMY0nzCAnJzrlflzQLKtyU3Vacpg"
+        />
         {/* Preload critical resources */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
