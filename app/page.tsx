@@ -4,11 +4,9 @@ import LandingPage from "@/section/LandingPage";
 
 export default function HomePage() {
   return (
-    <div>
-      <div>
-        <NavbarPrimary />
-        <LandingPage />
-      </div>
-    </div>
+    <>
+      <NavbarPrimary />
+      <LandingPage />
+    </>
   );
 }
