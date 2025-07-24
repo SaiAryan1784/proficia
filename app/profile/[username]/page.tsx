@@ -17,21 +17,23 @@ export async function generateMetadata({ params }: PublicProfileProps) {
 
     return generateProfileMetadata(
       username, 
-      profileData.user.name, 
+      profileData.user.name || undefined, 
       profileData.stats
     );
-  } catch (error) {
+  } catch {
     return {
       title: 'Profile | Proficia',
       description: 'View user profile on Proficia learning platform.',
     };
   }
-}// Enhanced profile page with schema markup
+}
+
+// Enhanced profile page with schema markup
 import React from 'react';
 import { notFound } from 'next/navigation';
 import { Badge } from "@/components/Gamification";
 import NavbarPrimary from '@/components/NavbarPrimary';
-import { generatePersonSchema, SchemaMarkup } from '@/lib/schema';
+import { SchemaMarkup } from '@/lib/schema';
 
 interface PublicProfileProps {
   params: Promise<{
@@ -126,7 +128,7 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
 
   // Generate schema markup for the person
   const personSchema = generatePersonSchema({
-    name: user.name,
+    name: user.name || undefined,
     username: user.username,
     profileUrl: `https://proficia.com/profile/${user.username}`,
     joinDate: user.joinedAt,

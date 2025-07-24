@@ -46,7 +46,7 @@ export default async function FAQPage() {
 
         <section>
           <div className="space-y-6">
-            {faqs.map((faq: any, index: number) => (
+            {faqs.map((faq: { question: string; answer: string }, index: number) => (
               <div key={index} className="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
                 <details className="group">
                   <summary className="p-6 cursor-pointer list-none">

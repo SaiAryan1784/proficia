@@ -69,7 +69,7 @@ export function generateOrganizationSchema() {
   };
 }
 
-export function generateReviewSchema(reviews: any[]) {
+export function generateReviewSchema(reviews: { rating: number }[]) {
   if (!reviews || reviews.length === 0) return null;
 
   return {
@@ -87,7 +87,7 @@ export function generatePersonSchema(userData: {
   username: string;
   profileUrl: string;
   joinDate: string;
-  achievements?: any[];
+  achievements?: object[];
   skills?: string[];
 }) {
   return {
@@ -133,14 +133,14 @@ export function generateBreadcrumbSchema(breadcrumbs: { name: string; url: strin
   };
 }
 
-function calculateAverageRating(reviews: any[]): number {
+function calculateAverageRating(reviews: { rating?: number }[]): number {
   if (!reviews || reviews.length === 0) return 0;
   const sum = reviews.reduce((acc, review) => acc + (review.rating || 0), 0);
   return Number((sum / reviews.length).toFixed(1));
 }
 
 // Helper component to inject schema into page head
-export function SchemaMarkup({ schema }: { schema: any }) {
+export function SchemaMarkup({ schema }: { schema: object }) {
   return (
     <script
       type="application/ld+json"
