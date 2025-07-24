@@ -57,7 +57,7 @@ export default function RootLayout({
         />
         <meta name="format-detection" content="telephone=no" />
       </head>
-      <body className={`min-h-screen ${syne.className}`}>
+      <body className={`${syne.className} antialiased`}>
         <a
           href="#main-content"
           className="skip-link sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-50 bg-blue-600 text-white px-4 py-2 rounded"

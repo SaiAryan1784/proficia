@@ -22,8 +22,10 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [fontSize, setFontSize] = useState<FontSize>('medium');
   const [highContrast, setHighContrast] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     // Load settings from localStorage on mount
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
     const savedFontSize = localStorage.getItem('fontSize') as FontSize | null;
@@ -43,6 +45,8 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   }, []);
 
   useEffect(() => {
+    if (!mounted) return;
+    
     // Apply theme class to document
     const root = document.documentElement;
     
@@ -54,9 +58,11 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     
     // Save to localStorage
     localStorage.setItem('theme', theme);
-  }, [theme]);
+  }, [theme, mounted]);
 
   useEffect(() => {
+    if (!mounted) return;
+    
     // Apply font size class to document
     const root = document.documentElement;
     
@@ -68,9 +74,11 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     
     // Save to localStorage
     localStorage.setItem('fontSize', fontSize);
-  }, [fontSize]);
+  }, [fontSize, mounted]);
 
   useEffect(() => {
+    if (!mounted) return;
+    
     // Apply high contrast class to document
     const root = document.documentElement;
     
@@ -82,7 +90,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     
     // Save to localStorage
     localStorage.setItem('highContrast', highContrast.toString());
-  }, [highContrast]);
+  }, [highContrast, mounted]);
 
   const toggleTheme = () => {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
@@ -104,6 +112,10 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     setFontSize: handleSetFontSize, 
     toggleHighContrast 
   }), [theme, fontSize, highContrast]);
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <ThemeContext.Provider value={value}>
