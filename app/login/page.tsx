@@ -1,4 +1,6 @@
-"use client";
+import { generateAuthMetadata } from "@/lib/seo";
+
+export const metadata = generateAuthMetadata('login');"use client";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";

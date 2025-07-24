@@ -1,4 +1,6 @@
-"use client";
+import { generateAuthMetadata } from "@/lib/seo";
+
+export const metadata = generateAuthMetadata('register');"use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";

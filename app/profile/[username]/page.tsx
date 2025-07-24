@@ -1,7 +1,37 @@
+import { generateProfileMetadata } from "@/lib/seo";
+import { generatePersonSchema } from "@/lib/schema";
+
+export async function generateMetadata({ params }: PublicProfileProps) {
+  const { username } = await params;
+  
+  try {
+    // Fetch user data for metadata
+    const profileData = await getUserProfileData(username);
+    if (!profileData) {
+      return {
+        title: 'User Not Found | Proficia',
+        description: 'The requested user profile could not be found.',
+        robots: { index: false, follow: false }
+      };
+    }
+
+    return generateProfileMetadata(
+      username, 
+      profileData.user.name, 
+      profileData.stats
+    );
+  } catch (error) {
+    return {
+      title: 'Profile | Proficia',
+      description: 'View user profile on Proficia learning platform.',
+    };
+  }
+}// Enhanced profile page with schema markup
 import React from 'react';
 import { notFound } from 'next/navigation';
 import { Badge } from "@/components/Gamification";
 import NavbarPrimary from '@/components/NavbarPrimary';
+import { generatePersonSchema, SchemaMarkup } from '@/lib/schema';
 
 interface PublicProfileProps {
   params: Promise<{
@@ -94,8 +124,19 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
     allBadges
   } = profileData;
 
+  // Generate schema markup for the person
+  const personSchema = generatePersonSchema({
+    name: user.name,
+    username: user.username,
+    profileUrl: `https://proficia.com/profile/${user.username}`,
+    joinDate: user.joinedAt,
+    achievements: allBadges,
+    skills: topicPerformance.map(tp => tp.topic)
+  });
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+      <SchemaMarkup schema={personSchema} />
       <NavbarPrimary />
       <div className="flex-1 px-2 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
         <div className="max-w-6xl mx-auto">

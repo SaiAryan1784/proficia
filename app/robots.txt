@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+
+# Allow all public pages
+Allow: /register
+Allow: /login
+Allow: /profile/*
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /setup-username
+
+# Allow specific API endpoints that return public data
+Allow: /api/topics
+
+# Sitemap location
+Sitemap: https://proficia.com/sitemap.xml
+
+# Crawl delay (optional, helps prevent overloading)
+Crawl-delay: 1
