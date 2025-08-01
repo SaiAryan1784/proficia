@@ -12,10 +12,10 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { href: '/admin/users', label: 'Home', icon: <FiUser size={20} /> },
-  { href: '/admin/settings', label: 'Statistics', icon: <FiBarChart2 size={20} /> },
-  // { href: '/profile', label: 'Profile', icon: <FiUser size={20} /> },
-  // { href: '/contact', label: 'Contact', icon: <FiMail size={20} /> },
+  { href: '/admin', label: 'Dashboard', icon: <FiBarChart2 size={20} /> },
+  { href: '/admin/users', label: 'Users', icon: <FiUser size={20} /> },
+  { href: '/admin/test-attempts', label: 'Test Attempts', icon: <FiBarChart2 size={20} /> },
+  { href: '/admin/settings', label: 'Settings', icon: <FiBarChart2 size={20} /> },
 ];
 
 const AdminNav: FC = () => {

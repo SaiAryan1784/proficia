@@ -41,6 +41,9 @@ export async function middleware(request: NextRequest) {
     if (!session.username) {
       return NextResponse.redirect(new URL("/setup-username", request.url));
     }
+    
+    // Check if user is admin (this will be validated server-side in the layout)
+    // The middleware just ensures authentication, the layout handles admin verification
   }
   
   // Allow the request to continue
