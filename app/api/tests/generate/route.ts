@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json(
         { error: "Unauthorized" },
@@ -48,8 +48,8 @@ export async function POST(request: Request) {
     const DAILY_TEST_LIMIT = 3;
     if (testsToday >= DAILY_TEST_LIMIT) {
       return NextResponse.json(
-        { 
-          error: "Daily test limit reached", 
+        {
+          error: "Daily test limit reached",
           message: `You can only create ${DAILY_TEST_LIMIT} tests per day. You've created ${testsToday} tests today. Try again tomorrow.`,
           testsCreated: testsToday,
           limit: DAILY_TEST_LIMIT,
@@ -60,11 +60,11 @@ export async function POST(request: Request) {
     }
 
     // Parse request body
-    const { topicId, difficulty = "medium", questionCount = 10 } = await request.json();
+    const { topicId, topicName, difficulty = "medium", questionCount = 10 } = await request.json();
 
-    if (!topicId) {
+    if (!topicId && !topicName) {
       return NextResponse.json(
-        { error: "Topic ID is required" },
+        { error: "Topic ID or Name is required" },
         { status: 400 }
       );
     }
@@ -72,15 +72,46 @@ export async function POST(request: Request) {
     // Automatically set time limit: 1 minute per question
     const timeLimit = Number(questionCount);
 
-    // Fetch the topic
-    const topic = await prisma.topic.findUnique({
-      where: { id: topicId }
-    });
+    let topic;
+
+    if (topicId) {
+      // Fetch existing topic
+      topic = await prisma.topic.findUnique({
+        where: { id: topicId }
+      });
+
+      if (!topic) {
+        return NextResponse.json({ error: "Topic not found" }, { status: 404 });
+      }
+    } else if (topicName) {
+      // Find or create topic by name
+      const sanitizedName = topicName.trim();
+
+      // Try to find existing topic by name (case insensitive search not directly supported by prisma standard findFirst without raw, so we'll just check exact match or assume user selects from list for now, but for custom topic we create it)
+      // Actually, for a robust "Any Topic", we should try to align with existing if possible or just create new.
+      // Let's first try to find one with the exact name.
+      topic = await prisma.topic.findUnique({
+        where: { name: sanitizedName }
+      });
+
+      if (!topic) {
+        // Create new Custom topic
+        console.log(`Creating new custom topic: ${sanitizedName}`);
+        topic = await prisma.topic.create({
+          data: {
+            name: sanitizedName,
+            description: `Custom topic: ${sanitizedName}`,
+            category: "Custom",
+            imageUrl: null // No image for custom topics initially
+          }
+        });
+      }
+    }
 
     if (!topic) {
       return NextResponse.json(
-        { error: "Topic not found" },
-        { status: 404 }
+        { error: "Failed to resolve topic" },
+        { status: 500 }
       );
     }
 
@@ -112,7 +143,8 @@ export async function POST(request: Request) {
             type: q.type,
             options: q.options || [],
             correctAnswer: q.correctAnswer,
-            explanation: q.explanation || null
+            explanation: q.explanation || null,
+            reference: q.reference || null
           }))
         }
       },

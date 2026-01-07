@@ -1,6 +1,6 @@
 // src/app/api/register/route.ts
 import { NextResponse } from "next/server";
-import { createUser } from "@/lib/utils";
+import { createUser } from "@/lib/auth-utils";
 import { prisma } from "@/lib/db";
 
 export async function POST(request: Request) {
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     return NextResponse.json(
-      { message: error},
+      { message: error },
       { status: 500 }
     );
   }

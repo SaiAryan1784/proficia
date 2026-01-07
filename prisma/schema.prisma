@@ -120,6 +120,7 @@ model Question {
   explanation   String?
   userAnswer    String?
   isCorrect     Boolean?
+  reference     String?
   test          Test         @relation(fields: [testId], references: [id], onDelete: Cascade)
 }
 

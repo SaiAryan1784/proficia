@@ -4,9 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import NavbarPrimary from "@/components/NavbarPrimary";
-import ButtonPrimary from "@/components/ButtonPrimary";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { FaGoogle } from 'react-icons/fa';
+import { FiArrowRight } from "react-icons/fi";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -38,141 +42,95 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <NavbarPrimary />
-      <div className="flex-1 flex justify-center items-center px-4 py-8 sm:py-12 md:py-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-sm mx-auto p-6 sm:p-8 space-y-6 bg-white rounded-lg shadow-lg"
-        >
-          <div className="text-center">
-            <motion.h1 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="text-2xl sm:text-3xl font-bold text-gray-900"
-            >
-              Welcome Back
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="mt-2 text-sm text-gray-600"
-            >
-              Sign in to your account
-            </motion.p>
-          </div>
-          
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="flex flex-col space-y-4"
-          >
-            <button
+    <div className="min-h-screen pt-16 flex items-center justify-center bg-background p-4 animate-in fade-in duration-500">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="w-full max-w-md"
+      >
+        <Card className="border-border shadow-xl shadow-primary/5">
+          <CardHeader className="space-y-1 text-center">
+            <div className="flex justify-center mb-2">
+              <BrandLogo variant="icon" width={48} />
+            </div>
+            <CardTitle className="text-2xl font-bold tracking-tight">Welcome back</CardTitle>
+            <CardDescription>
+              Enter your credentials to access your workspace
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button
+              variant="outline"
+              className="w-full h-11 relative"
               onClick={handleGoogleSignIn}
               disabled={isLoading}
-              className="flex items-center justify-center w-full max-w-xs mx-auto py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
             >
-              <FaGoogle className="mr-2 text-red-500" />
-              Sign in with Google
-            </button>
-            
+              <FaGoogle className="mr-2 h-4 w-4" />
+              Continue with Google
+            </Button>
+
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
+                <span className="w-full border-t border-border" />
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
               </div>
             </div>
-          </motion.div>
-          
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-4">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 }}
-              >
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                  Email
-                </label>
-                <input
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
                   id="email"
                   type="email"
-                  placeholder="Your email address"
+                  placeholder="name@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="mt-1 block w-full px-3 py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                  className="h-11"
+                  disabled={isLoading}
                 />
-              </motion.div>
-              
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.6 }}
-              >
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                  Password
-                </label>
-                <input
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Password</Label>
+                  <Link href="#" className="text-xs text-primary hover:underline">
+                    Forgot password?
+                  </Link>
+                </div>
+                <Input
                   id="password"
                   type="password"
-                  placeholder="Your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="mt-1 block w-full px-3 py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm"
-                />
-              </motion.div>
-            </div>
-            
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 }}
-              className="pt-2 flex flex-col items-center"
-            >
-              <div className="w-full max-w-xs mx-auto">
-                <ButtonPrimary 
-                  type="submit" 
-                  text={isLoading ? "Loading..." : "Login"} 
-                  disabled={isLoading} 
+                  className="h-11"
+                  disabled={isLoading}
                 />
               </div>
-              
+
               {error && (
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="mt-2 text-sm text-red-600"
-                >
+                <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm font-medium">
                   {error}
-                </motion.p>
+                </div>
               )}
-            </motion.div>
-          </form>
-          
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8 }}
-            className="text-center mt-4"
-          >
-            <p className="text-sm text-gray-600">
-              Don&apos;t have an account?{" "}
-              <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
-                Register here
-              </Link>
-            </p>
-          </motion.div>
-        </motion.div>
-      </div>
+
+              <Button type="submit" className="w-full h-11" disabled={isLoading}>
+                {isLoading ? "Signing in..." : "Sign In"}
+                {!isLoading && <FiArrowRight className="ml-2 h-4 w-4" />}
+              </Button>
+            </form>
+          </CardContent>
+          <CardFooter className="justify-center text-sm text-muted-foreground">
+            Don&apos;t have an account?{" "}
+            <Link href="/register" className="ml-1 text-primary hover:underline font-medium">
+              Sign up
+            </Link>
+          </CardFooter>
+        </Card>
+      </motion.div>
     </div>
   );
 }

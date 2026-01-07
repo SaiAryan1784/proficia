@@ -3,10 +3,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import Timer from "./Timer";
 import { useTimer } from "@/hooks/useTimer";
-import { TestResultShare } from "./SocialShare";
-import { FaArrowLeft, FaArrowRight, FaCheck, FaTrophy, FaClock, FaFire } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight, FaCheck, FaTrophy, FaClock, FaTimes, FaList } from "react-icons/fa";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 type QuestionType = "MULTIPLE_CHOICE" | "TEXT" | "TRUE_FALSE";
 type TestStatus = "DRAFT" | "IN_PROGRESS" | "COMPLETED";
@@ -18,6 +18,7 @@ interface Question {
   options: string[];
   correctAnswer: string | null;
   explanation: string | null;
+  reference?: string | null;
   userAnswer?: string;
   isCorrect?: boolean;
 }
@@ -61,12 +62,14 @@ export default function TestClient({ test }: TestClientProps) {
   const [gamificationResult, setGamificationResult] = useState<GamificationResult | null>(null);
   const [showExitConfirmation, setShowExitConfirmation] = useState(false);
   const [testStatus, setTestStatus] = useState<TestStatus>(test.status);
-  
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   const timer = useTimer(test.timeLimit);
+  const currentQuestion = test.questions[currentQuestionIndex];
 
   const handleSubmit = useCallback(async (isAutoSubmit = false) => {
     if (isSubmitting) return;
-    
+
     setIsSubmitting(true);
     timer.pause();
 
@@ -82,23 +85,23 @@ export default function TestClient({ test }: TestClientProps) {
           isAutoSubmit,
         }),
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to submit test");
       }
-      
+
       const data = await response.json();
-      
+
       // Update test with results
       test.questions = data.test.questions;
       setTotalScore(data.score);
       setShowResults(true);
-      
+
       // Handle gamification results
       if (data.gamification) {
         setGamificationResult(data.gamification);
       }
-      
+
     } catch (error) {
       setError(error instanceof Error ? error.message : "An unknown error occurred.");
     } finally {
@@ -155,16 +158,14 @@ export default function TestClient({ test }: TestClientProps) {
               startedAt: new Date().toISOString(),
             }),
           });
-          
+
           if (response.ok) {
-            // Update the test status locally
             setTestStatus("IN_PROGRESS");
           }
         } catch (error) {
           console.error("Error starting test:", error);
         }
       } else if (test.status === "IN_PROGRESS") {
-        // If test is already in progress, update local state
         setTestStatus("IN_PROGRESS");
       }
     };
@@ -176,10 +177,6 @@ export default function TestClient({ test }: TestClientProps) {
     setShowExitConfirmation(false);
     await handleSubmit(false); // Submit current answers
     router.push("/dashboard");
-  };
-
-  const handleExitCancel = () => {
-    setShowExitConfirmation(false);
   };
 
   const handleAnswerChange = (questionId: string, answer: string) => {
@@ -201,201 +198,257 @@ export default function TestClient({ test }: TestClientProps) {
     }
   };
 
-  const getAnsweredCount = () => {
-    return Object.keys(userAnswers).length;
-  };
-
-  const getProgressPercentage = () => {
-    return Math.round((getAnsweredCount() / test.questions.length) * 100);
-  };
+  const getAnsweredCount = () => Object.keys(userAnswers).length;
+  const progressPercent = Math.round(((currentQuestionIndex + 1) / test.questions.length) * 100);
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-8">
-        <div className="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-400 px-4 py-3 rounded mb-6">
-          {error}
+      <div className="flex h-screen flex-col items-center justify-center p-8 text-center">
+        <div className="rounded-full bg-destructive/10 p-4 text-destructive mb-4">
+          <FaTimes size={32} />
         </div>
-        <button
-          onClick={() => router.push("/dashboard")}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition-colors"
-        >
-          Return to Dashboard
-        </button>
+        <h2 className="text-xl font-bold mb-2">Error Occurred</h2>
+        <p className="text-muted-foreground mb-6">{error}</p>
+        <Button onClick={() => router.push("/dashboard")}>Return to Dashboard</Button>
       </div>
     );
   }
 
+  // RESULTS VIEW
   if (showResults) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Results Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-8"
-          >
-            <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
-              <FaTrophy className="text-6xl text-yellow-500 mx-auto mb-4" />
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                Test Completed!
-              </h1>
-              <div className="text-5xl font-bold mb-4">
-                <span className={`${
-                  totalScore >= 80 ? 'text-green-500' : 
-                  totalScore >= 60 ? 'text-yellow-500' : 'text-red-500'
-                }`}>
+      <ScrollArea className="h-[calc(100vh-4rem)] w-full">
+        <div className="container max-w-4xl mx-auto py-10 px-4">
+          {/* Header Card */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10 text-center">
+            <div className="inline-flex items-center justify-center p-4 rounded-full bg-primary/10 text-primary mb-6 ring-8 ring-primary/5">
+              <FaTrophy size={48} />
+            </div>
+            <h1 className="text-4xl font-bold mb-2">Assessment Complete</h1>
+            <p className="text-muted-foreground mb-8">Here is how you performed on {test.title}</p>
+
+            <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto">
+              <div className="p-4 rounded-2xl bg-card border border-border shadow-sm">
+                <div className={`text-4xl font-bold mb-1 ${totalScore >= 80 ? 'text-green-500' : totalScore >= 60 ? 'text-yellow-500' : 'text-red-500'}`}>
                   {totalScore}%
-                </span>
+                </div>
+                <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Score</div>
               </div>
-              <p className="text-gray-600 dark:text-gray-400">
-                You answered {test.questions.filter(q => q.isCorrect).length} out of {test.questions.length} questions correctly
-              </p>
-              
-              {/* Time Stats */}
-              {test.timeLimit && (
-                <div className="mt-4 flex items-center justify-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
-                  <div className="flex items-center space-x-1">
-                    <FaClock />
-                    <span>Time: {timer.formatTimeSpent()}</span>
-                  </div>
-                  {timer.timeSpent < (test.timeLimit * 60 * 0.75) && (
-                    <div className="flex items-center space-x-1 text-green-600 dark:text-green-400">
-                      <FaFire />
-                      <span>Speed Bonus!</span>
-                    </div>
-                  )}
+              <div className="p-4 rounded-2xl bg-card border border-border shadow-sm">
+                <div className="text-4xl font-bold mb-1 text-foreground">
+                  {test.questions.filter(q => q.isCorrect).length}/{test.questions.length}
                 </div>
-              )}
+                <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Correct</div>
+              </div>
+              <div className="p-4 rounded-2xl bg-card border border-border shadow-sm">
+                <div className="text-4xl font-bold mb-1 text-foreground">
+                  {gamificationResult?.xpGain.total || 0}
+                </div>
+                <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">XP Earned</div>
+              </div>
+            </div>
 
-              {/* Gamification Results */}
-              {gamificationResult && (
-                <div className="mt-6 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800">
-                  <div className="flex items-center justify-center space-x-4 text-sm">
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-indigo-600 dark:text-indigo-400">
-                        +{gamificationResult.xpGain.total} XP
-                      </div>
-                      <div className="text-gray-600 dark:text-gray-400">Experience Gained</div>
-                    </div>
-                    {gamificationResult.levelUp && (
-                      <div className="text-center">
-                        <div className="text-lg font-bold text-yellow-600 dark:text-yellow-400">
-                          Level {gamificationResult.newLevel}!
-                        </div>
-                        <div className="text-gray-600 dark:text-gray-400">Level Up!</div>
-                      </div>
-                    )}
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-orange-600 dark:text-orange-400">
-                        {gamificationResult.newStreak} days
-                      </div>
-                      <div className="text-gray-600 dark:text-gray-400">Streak</div>
-                    </div>
-                  </div>
-                </div>
-              )}
+            {/* Gamification Badge */}
+            {gamificationResult?.levelUp && (
+              <div className="mt-8 inline-block px-6 py-2 rounded-full bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-orange-600 font-bold border border-orange-500/30">
+                🎉 Level Up! You are now Level {gamificationResult.newLevel}
+              </div>
+            )}
 
-              {/* Social Share */}
-              {totalScore >= 50 && (
-                <div className="mt-6">
-                  <TestResultShare 
-                    score={totalScore}
-                    topic={test.title}
-                    level={gamificationResult?.newLevel}
-                    badges={0}
-                  />
-                </div>
-              )}
+            <div className="flex justify-center gap-4 mt-10">
+              <Button onClick={() => router.push("/dashboard")} size="lg">Return to Dashboard</Button>
+              <Button onClick={() => router.push("/statistics")} variant="outline" size="lg">View Statistics</Button>
             </div>
           </motion.div>
 
-          {/* Detailed Results */}
-          <div className="space-y-4">
-            {test.questions.map((question, index) => (
-              <motion.div
-                key={question.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className={`bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border-l-4 ${
-                  question.isCorrect 
-                    ? 'border-green-500' 
-                    : 'border-red-500'
-                }`}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    Question {index + 1}
-                  </h3>
-                  <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    question.isCorrect
-                      ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400'
-                      : 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400'
-                  }`}>
-                    {question.isCorrect ? 'Correct' : 'Incorrect'}
+          {/* Question Analysis */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between border-b pb-4 mb-6">
+              <h2 className="text-xl font-bold">Detailed Analysis</h2>
+            </div>
+            {test.questions.map((q, i) => (
+              <div key={q.id} className={`p-6 rounded-xl border ${q.isCorrect ? 'border-green-500/30 bg-green-500/5' : 'border-red-500/30 bg-red-500/5'}`}>
+                <div className="flex gap-4">
+                  <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${q.isCorrect ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
+                    {i + 1}
+                  </div>
+                  <div className="space-y-3 w-full">
+                    <p className="font-medium text-lg">{q.text}</p>
+
+                    <div className="grid md:grid-cols-2 gap-4 text-sm mt-2">
+                      <div className="p-3 rounded-lg bg-background/50 border border-border/50">
+                        <span className="text-muted-foreground block text-xs mb-1">Your Answer</span>
+                        <span className={q.isCorrect ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>{q.userAnswer || "Skipped"}</span>
+                      </div>
+                      {!q.isCorrect && (
+                        <div className="p-3 rounded-lg bg-background/50 border border-border/50">
+                          <span className="text-muted-foreground block text-xs mb-1">Correct Answer</span>
+                          <span className="text-foreground font-medium">{q.correctAnswer}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {q.explanation && (
+                      <div className="mt-3 text-sm text-muted-foreground bg-background/30 p-3 rounded-lg">
+                        <span className="font-semibold text-foreground mr-1">Explanation:</span>
+                        {q.explanation}
+                      </div>
+                    )}
+                    {q.reference && (
+                      <div className="mt-2 text-xs text-muted-foreground bg-muted/20 px-3 py-1.5 rounded border-l-2 border-primary/40 italic">
+                        <span className="font-semibold not-italic text-foreground">Source: </span>
+                        {q.reference}
+                      </div>
+                    )}
                   </div>
                 </div>
-                
-                <p className="text-gray-700 dark:text-gray-300 mb-4">{question.text}</p>
-                
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Your answer:</span>
-                    <span className={`font-medium ${
-                      question.isCorrect 
-                        ? 'text-green-600 dark:text-green-400' 
-                        : 'text-red-600 dark:text-red-400'
-                    }`}>
-                      {question.userAnswer || 'No answer'}
-                    </span>
-                  </div>
-                  
-                  {!question.isCorrect && (
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600 dark:text-gray-400">Correct answer:</span>
-                      <span className="font-medium text-green-600 dark:text-green-400">
-                        {question.correctAnswer}
-                      </span>
-                    </div>
-                  )}
-                  
-                  {question.explanation && (
-                    <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
-                      <h4 className="font-medium text-blue-900 dark:text-blue-300 mb-1">Explanation:</h4>
-                      <p className="text-blue-800 dark:text-blue-400 text-sm">{question.explanation}</p>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
+              </div>
             ))}
           </div>
-
-          {/* Action Buttons */}
-          <div className="mt-8 flex justify-center space-x-4">
-            <button
-              onClick={() => router.push("/practice")}
-              className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md font-medium transition-colors"
-            >
-              Take Another Test
-            </button>
-            <button
-              onClick={() => router.push("/statistics")}
-              className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-md font-medium transition-colors"
-            >
-              View Statistics
-            </button>
-          </div>
         </div>
-      </div>
+      </ScrollArea>
     );
   }
 
-  // Test taking interface
-  const currentQuestion = test.questions[currentQuestionIndex];
-
+  // ACTIVE TEST VIEW ("Focus Mode")
   return (
-    <>
+    <div className="flex flex-col h-[calc(100vh-6.5rem)] max-h-[calc(100vh-6.5rem)] bg-background overflow-hidden relative rounded-xl border border-border shadow-sm">
+
+      {/* 1. Sticky Header */}
+      <header className="flex-shrink-0 h-16 border-b border-border bg-card/50 backdrop-blur-sm px-6 flex items-center justify-between z-20">
+        <div className="flex items-center gap-4">
+          {/* Sidebar Toggle */}
+          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-muted rounded-md text-muted-foreground lg:hidden">
+            <FaList />
+          </button>
+
+          <div>
+            <h1 className="font-bold text-foreground truncate max-w-[200px] md:max-w-md">{test.title}</h1>
+            <div className="text-xs text-muted-foreground flex items-center gap-2">
+              <span>Question {currentQuestionIndex + 1} of {test.questions.length}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          {test.timeLimit && (
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-lg text-base font-bold font-mono transition-all shadow-sm border-2 ${timer.timeStatus === 'critical'
+                ? 'bg-red-50 text-red-700 border-red-300 dark:bg-red-950/50 dark:text-red-300 dark:border-red-800 animate-pulse'
+                : timer.timeStatus === 'warning'
+                  ? 'bg-yellow-50 text-yellow-700 border-yellow-300 dark:bg-yellow-950/50 dark:text-yellow-300 dark:border-yellow-800'
+                  : 'bg-primary/10 text-primary border-primary/30 dark:bg-primary/20'
+              }`}>
+              <div className={timer.timeStatus === 'critical' ? 'animate-bounce' : ''}>
+                <FaClock size={16} />
+              </div>
+              <span className="tabular-nums">{timer.formatTime()}</span>
+            </div>
+          )}
+          <Button variant="ghost" size="sm" onClick={() => setShowExitConfirmation(true)} className="text-muted-foreground hover:text-destructive">
+            <FaTimes size={18} />
+          </Button>
+        </div>
+      </header>
+
+      {/* Progress Bar */}
+      <div className="h-1 bg-muted w-full flex-shrink-0">
+        <motion.div
+          className="h-full bg-primary"
+          initial={{ width: 0 }}
+          animate={{ width: `${progressPercent}%` }}
+          transition={{ duration: 0.5 }}
+        />
+      </div>
+
+      {/* 2. Main Content (Split Pane) */}
+      <div className="flex-1 flex overflow-hidden relative">
+
+        {/* Left Pane: Question Context / Stem */}
+        <div className="flex-1 flex flex-col min-w-0 bg-background/50">
+          <ScrollArea className="flex-1 p-6 md:p-10 w-full">
+            <div className="max-w-3xl mx-auto space-y-8">
+              <motion.div
+                key={`q-${currentQuestion.id}`}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3 }}
+                className="prose dark:prose-invert max-w-none"
+              >
+                <h2 className="text-2xl md:text-3xl font-medium leading-relaxed font-serif text-foreground mb-4">
+                  {currentQuestion.text}
+                </h2>
+                {currentQuestion.reference && (
+                  <div className="mt-3 text-sm text-muted-foreground bg-muted/30 px-4 py-2 rounded-lg border-l-4 border-primary/50 italic">
+                    <span className="font-semibold not-italic text-foreground">Source: </span>
+                    {currentQuestion.reference}
+                  </div>
+                )}
+              </motion.div>
+            </div>
+          </ScrollArea>
+        </div>
+
+        {/* Right Pane: Options (On Mobile, this is stacked or same view) */}
+        {/* We use a max-width container centered or split based on design preferences. 
+            For this "Zen Mode", let's keep it centered if single column, or split. 
+            Detailed design: Text on top, Options below is better for reading flow usually. 
+            But plan said "2-column grid". Let's stick to 2-column for Desktop.
+        */}
+        <div className="hidden lg:flex w-[400px] xl:w-[480px] border-l border-border bg-card/30 flex-col">
+          <ScrollArea className="flex-1 p-6">
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">Select Answer</h3>
+              <QuestionOptions
+                question={currentQuestion}
+                userAnswers={userAnswers}
+                onAnswer={handleAnswerChange}
+              />
+            </div>
+          </ScrollArea>
+        </div>
+      </div>
+
+      {/* Mobile/Tablet Options Interleave (If lg is hidden, show this instead within the main scroll area? 
+          Actually, for a robust responsive design, let's put the options IN the main scroll area for mobile, 
+          and show the separate pane for desktop.
+      */}
+      <div className="lg:hidden absolute inset-x-0 bottom-[80px] p-4 bg-gradient-to-t from-background via-background to-transparent z-10 pointer-events-none">
+        <div className="pointer-events-auto bg-card border border-border rounded-xl shadow-lg p-4 max-h-[40vh] overflow-y-auto">
+          <QuestionOptions
+            question={currentQuestion}
+            userAnswers={userAnswers}
+            onAnswer={handleAnswerChange}
+          />
+        </div>
+      </div>
+
+
+      {/* 3. Sticky Footer */}
+      <footer className="flex-shrink-0 h-20 border-t border-border bg-background px-6 flex items-center justify-between z-20">
+        <Button
+          variant="ghost"
+          onClick={handlePreviousQuestion}
+          disabled={currentQuestionIndex === 0}
+          className="gap-2"
+        >
+          <FaArrowLeft size={16} /> Previous
+        </Button>
+
+        <div className="text-sm font-medium text-muted-foreground hidden md:block">
+          {getAnsweredCount()} / {test.questions.length} Answered
+        </div>
+
+        {currentQuestionIndex === test.questions.length - 1 ? (
+          <Button onClick={() => handleSubmit()} disabled={isSubmitting} className="gap-2" size="lg">
+            {isSubmitting ? "Submitting..." : "Submit Assessment"} <FaCheck size={16} />
+          </Button>
+        ) : (
+          <Button onClick={handleNextQuestion} className="gap-2" size="lg">
+            Next Question <FaArrowRight size={16} />
+          </Button>
+        )}
+      </footer>
+
       {/* Exit Confirmation Modal */}
       <AnimatePresence>
         {showExitConfirmation && (
@@ -403,252 +456,95 @@ export default function TestClient({ test }: TestClientProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6"
+              className="bg-card rounded-xl shadow-xl max-w-md w-full p-6 border border-border"
             >
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Submit Test and Exit?
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                You have an ongoing test. Do you want to submit your current answers and exit? 
-                Your progress will be saved and you can review your results.
+              <h3 className="text-lg font-semibold text-foreground mb-4">Exit Assessment?</h3>
+              <p className="text-muted-foreground mb-6">
+                Test is in progress. Exit now will save your current answers but you might lose your streak bonus.
               </p>
               <div className="flex space-x-3 justify-end">
-                <button
-                  onClick={handleExitCancel}
-                  className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleExitConfirm}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition-colors"
-                >
-                  Submit Test
-                </button>
+                <Button variant="outline" onClick={() => setShowExitConfirmation(false)}>Cancel</Button>
+                <Button onClick={handleExitConfirm}>Yes, Exit</Button>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header with Timer and Progress */}
-        <div className="mb-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-                {test.title}
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Question {currentQuestionIndex + 1} of {test.questions.length}
-              </p>
-            </div>
-            
-            <div className="mt-4 md:mt-0 flex items-center space-x-4">
-              {/* Test button for exit confirmation - Remove in production */}
-              {!showResults && testStatus !== "COMPLETED" && (
-                <button
-                  onClick={() => setShowExitConfirmation(true)}
-                  className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded transition-colors"
-                  title="Test exit confirmation (Remove in production)"
-                >
-                  Test Exit
-                </button>
-              )}
-              
-              {test.timeLimit && (
-                <Timer 
-                  timeLimit={test.timeLimit}
-                  onTimeUp={() => handleSubmit(true)}
-                  autoStart={true}
-                />
-              )}
-            </div>
-          </div>
-
-          {/* Progress Bar */}
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-            <div 
-              className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${((currentQuestionIndex + 1) / test.questions.length) * 100}%` }}
-            />
-          </div>
-          
-          {/* Answer Progress */}
-          <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            {getAnsweredCount()} of {test.questions.length} questions answered ({getProgressPercentage()}%)
-          </div>
-        </div>
-
-        {/* Question Card */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentQuestionIndex}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            className="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 mb-6"
-          >
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-              {currentQuestion.text}
-            </h2>
-
-            {/* Multiple Choice Options */}
-            {currentQuestion.type === "MULTIPLE_CHOICE" && (
-              <div className="space-y-3">
-                {currentQuestion.options.map((option, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleAnswerChange(currentQuestion.id, option)}
-                    className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
-                      userAnswers[currentQuestion.id] === option
-                        ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300'
-                        : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                        userAnswers[currentQuestion.id] === option
-                          ? 'border-indigo-500 bg-indigo-500'
-                          : 'border-gray-300 dark:border-gray-600'
-                      }`}>
-                        {userAnswers[currentQuestion.id] === option && (
-                          <FaCheck className="text-white text-xs" />
-                        )}
-                      </div>
-                      <span>{option}</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* True/False Options */}
-            {currentQuestion.type === "TRUE_FALSE" && (
-              <div className="flex space-x-4">
-                {["True", "False"].map((option) => (
-                  <button
-                    key={option}
-                    onClick={() => handleAnswerChange(currentQuestion.id, option)}
-                    className={`flex-1 p-4 rounded-lg border-2 transition-all ${
-                      userAnswers[currentQuestion.id] === option
-                        ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300'
-                        : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                    }`}
-                  >
-                    <div className="flex items-center justify-center space-x-2">
-                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                        userAnswers[currentQuestion.id] === option
-                          ? 'border-indigo-500 bg-indigo-500'
-                          : 'border-gray-300 dark:border-gray-600'
-                      }`}>
-                        {userAnswers[currentQuestion.id] === option && (
-                          <FaCheck className="text-white text-xs" />
-                        )}
-                      </div>
-                      <span className="font-medium">{option}</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Text Input */}
-            {currentQuestion.type === "TEXT" && (
-              <textarea
-                value={userAnswers[currentQuestion.id] || ""}
-                onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
-                placeholder="Enter your answer here..."
-                className="w-full p-4 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                rows={4}
-              />
-            )}
-          </motion.div>
-        </AnimatePresence>
-
-        {/* Navigation */}
-        <div className="flex justify-between items-center">
-          <button
-            onClick={handlePreviousQuestion}
-            disabled={currentQuestionIndex === 0}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-md font-medium transition-colors ${
-              currentQuestionIndex === 0
-                ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-                : 'bg-gray-600 hover:bg-gray-700 text-white'
-            }`}
-          >
-            <FaArrowLeft />
-            <span>Previous</span>
-          </button>
-
-          <div className="flex space-x-3">
-            {currentQuestionIndex === test.questions.length - 1 ? (
-              <button
-                onClick={() => handleSubmit()}
-                disabled={isSubmitting}
-                className={`flex items-center space-x-2 px-6 py-2 rounded-md font-medium transition-colors ${
-                  isSubmitting
-                    ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                    : 'bg-green-600 hover:bg-green-700 text-white'
-                }`}
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span>Submitting...</span>
-                  </>
-                ) : (
-                  <>
-                    <FaCheck />
-                    <span>Submit Test</span>
-                  </>
-                )}
-              </button>
-            ) : (
-              <button
-                onClick={handleNextQuestion}
-                className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md font-medium transition-colors"
-              >
-                <span>Next</span>
-                <FaArrowRight />
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Question Overview */}
-        <div className="mt-8 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-            Question Overview
-          </h3>
-          <div className="grid grid-cols-5 md:grid-cols-10 gap-2">
-            {test.questions.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentQuestionIndex(index)}
-                className={`aspect-square rounded-md text-sm font-medium transition-colors ${
-                  index === currentQuestionIndex
-                    ? 'bg-indigo-600 text-white'
-                    : userAnswers[test.questions[index].id]
-                    ? 'bg-green-500 text-white'
-                    : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500'
-                }`}
-              >
-                {index + 1}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
     </div>
-    </>
   );
+}
+
+// Helper Component for Options to reuse
+function QuestionOptions({ question, userAnswers, onAnswer }: {
+  question: Question,
+  userAnswers: Record<string, string>,
+  onAnswer: (id: string, val: string) => void
+}) {
+  if (question.type === "MULTIPLE_CHOICE") {
+    return (
+      <div className="space-y-3">
+        {question.options.map((option, index) => {
+          const isSelected = userAnswers[question.id] === option;
+          return (
+            <button
+              key={index}
+              onClick={() => onAnswer(question.id, option)}
+              className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 flex items-center gap-4 group ${isSelected
+                ? 'border-primary bg-primary/5 text-primary shadow-sm'
+                : 'border-border hover:border-primary/50 hover:bg-muted/50 bg-card/50 text-foreground'
+                }`}
+            >
+              <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${isSelected ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/30 group-hover:border-primary/50'
+                }`}>
+                {isSelected ? <FaCheck size={12} /> : <span className="text-xs font-semibold">{String.fromCharCode(65 + index)}</span>}
+              </div>
+              <span className={`font-medium ${isSelected ? 'font-semibold' : ''}`}>{option}</span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  if (question.type === "TRUE_FALSE") {
+    return (
+      <div className="grid grid-cols-1 gap-3">
+        {["True", "False"].map((option) => {
+          const isSelected = userAnswers[question.id] === option;
+          return (
+            <button
+              key={option}
+              onClick={() => onAnswer(question.id, option)}
+              className={`p-6 rounded-xl border-2 transition-all duration-200 text-center relative overflow-hidden group ${isSelected
+                ? 'border-primary bg-primary/5 text-primary shadow-sm'
+                : 'border-border hover:border-primary/50 hover:bg-muted/50 bg-card/50 text-foreground'
+                }`}
+            >
+              <span className={`text-lg font-semibold relative z-10 ${isSelected ? 'font-bold' : ''}`}>{option}</span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  if (question.type === "TEXT") {
+    return (
+      <textarea
+        value={userAnswers[question.id] || ""}
+        onChange={(e) => onAnswer(question.id, e.target.value)}
+        placeholder="Type your answer here..."
+        className="w-full h-48 p-4 border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-ring bg-background/50 resize-none"
+      />
+    );
+  }
+
+  return null;
 }

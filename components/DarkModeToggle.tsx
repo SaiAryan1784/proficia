@@ -10,8 +10,8 @@ interface DarkModeToggleProps {
   className?: string;
 }
 
-const DarkModeToggle: React.FC<DarkModeToggleProps> = ({ 
-  size = 'md', 
+const DarkModeToggle: React.FC<DarkModeToggleProps> = ({
+  size = 'md',
   variant = 'button',
   showLabel = false,
   className = ''
@@ -42,10 +42,10 @@ const DarkModeToggle: React.FC<DarkModeToggleProps> = ({
           onClick={toggleTheme}
           className={`
             relative inline-flex items-center justify-center
-            w-12 h-6 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-            ${theme === 'dark' 
-              ? 'bg-blue-600' 
-              : 'bg-gray-300'
+            w-12 h-6 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2
+            ${theme === 'dark'
+              ? 'bg-primary'
+              : 'bg-input'
             }
           `}
           aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
@@ -56,17 +56,15 @@ const DarkModeToggle: React.FC<DarkModeToggleProps> = ({
               ${theme === 'dark' ? 'translate-x-3' : '-translate-x-3'}
             `}
           />
-          <FiSun 
-            size={12} 
-            className={`absolute left-1 text-yellow-500 transition-opacity duration-200 ${
-              theme === 'dark' ? 'opacity-0' : 'opacity-100'
-            }`}
+          <FiSun
+            size={12}
+            className={`absolute left-1 text-yellow-500 transition-opacity duration-200 ${theme === 'dark' ? 'opacity-0' : 'opacity-100'
+              }`}
           />
-          <FiMoon 
-            size={12} 
-            className={`absolute right-1 text-blue-200 transition-opacity duration-200 ${
-              theme === 'dark' ? 'opacity-100' : 'opacity-0'
-            }`}
+          <FiMoon
+            size={12}
+            className={`absolute right-1 text-primary-foreground transition-opacity duration-200 ${theme === 'dark' ? 'opacity-100' : 'opacity-0'
+              }`}
           />
         </button>
       </div>
@@ -80,9 +78,9 @@ const DarkModeToggle: React.FC<DarkModeToggleProps> = ({
         className={`
           ${buttonSizes[size]}
           rounded-lg transition-all duration-200 ease-in-out
-          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800
-          ${theme === 'dark' 
-            ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600 border border-gray-600' 
+          focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 dark:focus:ring-offset-background
+          ${theme === 'dark'
+            ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600 border border-gray-600'
             : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
           }
           flex items-center justify-center shadow-sm

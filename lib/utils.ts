@@ -1,16 +1,6 @@
-// src/lib/utils.ts
-import { hash } from "bcrypt";
-import { prisma } from "./db";
+import { type ClassValue, clsx } from "clsx"
+import { twMerge } from "tailwind-merge"
 
-export async function createUser(email: string, password: string, name?: string, username?: string) {
-  const hashedPassword = await hash(password, 10);
-
-  return prisma.users.create({
-    data: {
-      email,
-      password: hashedPassword,
-      name,
-      username
-    }
-  });
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
 }

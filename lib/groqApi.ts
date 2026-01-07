@@ -11,6 +11,7 @@ interface GroqTestQuestion {
   options?: string[];
   correctAnswer: string;
   explanation?: string;
+  reference?: string;
 }
 
 interface GroqTestResponse {
@@ -24,7 +25,7 @@ export async function generateTestWithGroq({
   questionCount
 }: GenerateTestParams): Promise<GroqTestResponse> {
   const GROQ_API_KEY = process.env.GROQ_API_KEY;
-  
+
   if (!GROQ_API_KEY) {
     throw new Error('GROQ_API_KEY is not defined in environment variables');
   }
@@ -39,6 +40,7 @@ export async function generateTestWithGroq({
     2. Provide 4 distinct answer options labeled A, B, C, and D
     3. Indicate which option is correct
     4. Provide a brief explanation of why the correct answer is right
+    5. Provide a brief reference or source citation (max 5-10 words) for the fact tested (e.g., 'MDN Docs', 'Newton\'s Laws', 'Wikipedia - [Page Name]').
 
     Format your response as a JSON object with the following structure:
     {
@@ -48,7 +50,8 @@ export async function generateTestWithGroq({
           "type": "MULTIPLE_CHOICE",
           "options": ["Option A", "Option B", "Option C", "Option D"],
           "correctAnswer": "Option A",
-          "explanation": "explanation here"
+          "explanation": "explanation here",
+          "reference": "Source citation here"
         },
         // more questions...
       ]
@@ -59,7 +62,7 @@ export async function generateTestWithGroq({
 
   try {
     console.log(`Sending request to Groq API for topic: ${topic}`);
-    
+
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -67,7 +70,7 @@ export async function generateTestWithGroq({
         'Authorization': `Bearer ${GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'llama3-70b-8192', // Updated to correct model name
+        model: 'openai/gpt-oss-120b', // Updated to correct model name
         messages: [
           {
             role: 'system',
@@ -91,14 +94,14 @@ export async function generateTestWithGroq({
 
     const data = await response.json();
     console.log("Groq API response received:", data);
-    
+
     const content = data.choices[0]?.message?.content;
-    
+
     if (!content) {
       console.error("Empty content in Groq API response");
       throw new Error('Empty response from Groq API');
     }
-    
+
     let parsedContent;
     try {
       // Check if content is already a JSON object or a string that needs parsing
@@ -109,17 +112,17 @@ export async function generateTestWithGroq({
       console.error("Raw content:", content);
       throw new Error('Invalid JSON response from Groq API');
     }
-    
+
     // Verify the structure of the parsed content
     if (!parsedContent.questions || !Array.isArray(parsedContent.questions)) {
       console.error("Malformed response - questions array not found:", parsedContent);
       throw new Error('Malformed response from Groq API - questions array not found');
     }
-    
+
     return parsedContent;
   } catch (error) {
     console.error('Error generating test with Groq:', error);
-    
+
     // Fallback to sample questions in case of API error
     return {
       questions: Array.from({ length: questionCount }, (_, i) => ({

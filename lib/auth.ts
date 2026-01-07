@@ -20,6 +20,9 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      httpOptions: {
+        timeout: 10000,
+      },
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -67,7 +70,7 @@ export const authOptions: NextAuthOptions = {
         const existingUser = await prisma.users.findUnique({
           where: { email: profile.email }
         });
-        
+
         // If user doesn't exist, create one
         if (!existingUser) {
           const newUser = await prisma.users.create({
@@ -78,7 +81,7 @@ export const authOptions: NextAuthOptions = {
               // Username will be set later via the username setup flow
             }
           });
-          
+
           // Create the account link
           await prisma.account.create({
             data: {
@@ -93,7 +96,7 @@ export const authOptions: NextAuthOptions = {
               id_token: account.id_token,
             }
           });
-          
+
           user.id = newUser.id;
         } else {
           // User exists, check if account link exists
@@ -103,7 +106,7 @@ export const authOptions: NextAuthOptions = {
               providerAccountId: account.providerAccountId
             }
           });
-          
+
           // If account link doesn't exist, create it
           if (!existingAccount) {
             await prisma.account.create({
@@ -120,11 +123,11 @@ export const authOptions: NextAuthOptions = {
               }
             });
           }
-          
+
           user.id = existingUser.id;
         }
       }
-      
+
       return true;
     },
     async session({ session, token }) {
@@ -144,7 +147,7 @@ export const authOptions: NextAuthOptions = {
         });
         token.username = dbUser?.username ?? undefined;
       }
-      
+
       // Handle session update trigger (when update() is called)
       if (trigger === "update") {
         // Refetch user data from database
@@ -152,14 +155,14 @@ export const authOptions: NextAuthOptions = {
           where: { id: token.id },
           select: { username: true, name: true, email: true }
         });
-        
+
         if (dbUser) {
           token.username = dbUser.username ?? undefined;
           token.name = dbUser.name;
           token.email = dbUser.email;
         }
       }
-      
+
       return token;
     },
     async redirect({ url, baseUrl }) {

@@ -2,7 +2,7 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-import SideNav from "@/components/SideNav"; // Make sure to update the import
+import { TopNav } from "@/components/TopNav";
 
 export default async function AuthenticatedLayout({
   children,
@@ -10,20 +10,20 @@ export default async function AuthenticatedLayout({
   children: React.ReactNode;
 }) {
   const session = await getServerSession(authOptions);
-  
+
   // Redirect if not logged in
   if (!session?.user) {
     redirect("/login");
   }
-  
+
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-      {/* Sidebar Navigation */}
-      <SideNav />
-      
-      {/* Main Content with proper margin */}
-      <main className="flex-1 transition-all duration-300 lg:ml-60">
-        <div className="container mx-auto px-4 py-6">
+    <div className="flex min-h-screen flex-col bg-background transition-colors duration-200">
+      {/* Top Navigation */}
+      <TopNav />
+
+      {/* Main Content */}
+      <main className="flex-1 w-full">
+        <div className="container mx-auto px-4 py-4">
           {children}
         </div>
       </main>

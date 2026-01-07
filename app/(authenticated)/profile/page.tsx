@@ -167,7 +167,7 @@ export default function ProfilePage() {
           username: editableData.username,
         }));
         setSuccessMessage("Profile updated successfully!");
-                setSuccessMessage("Profile updated successfully!");
+        setSuccessMessage("Profile updated successfully!");
         setEditMode(false);
       } else {
         setError(data.message || "Failed to update profile");
@@ -233,16 +233,17 @@ export default function ProfilePage() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
     <div className="max-w-3xl mx-auto py-4 sm:py-6 md:py-8 px-2 sm:px-4 lg:px-6">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-        <div className="bg-gradient-to-r from-blue-400 to-purple-500 px-4 sm:px-6 py-3 sm:py-4">
-          <h1 className="text-xl sm:text-2xl font-bold text-white">Profile</h1>
+      <div className="bg-card rounded-xl shadow-sm overflow-hidden border border-border">
+        {/* Removed Gradient, used flat primary background or neutral */}
+        <div className="bg-primary/5 px-4 sm:px-6 py-3 sm:py-4 border-b border-border flex items-center">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Profile</h1>
         </div>
 
         <div className="p-4 sm:p-6">
@@ -253,14 +254,14 @@ export default function ProfilePage() {
           )}
 
           {error && (
-            <div className="mb-4 sm:mb-6 bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-400 px-3 sm:px-4 py-2 sm:py-3 rounded relative">
+            <div className="mb-4 sm:mb-6 bg-destructive/10 border border-destructive/20 text-destructive px-3 sm:px-4 py-2 sm:py-3 rounded relative">
               {error}
             </div>
           )}
 
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
             <div className="flex flex-col items-center">
-              <div className="relative w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 mb-4 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">{/* ...existing code... */}
+              <div className="relative w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 mb-4 rounded-full overflow-hidden bg-muted border border-border">
                 {userData.image && !imageError ? (
                   <Image
                     src={userData.image}
@@ -270,7 +271,7 @@ export default function ProfilePage() {
                     onError={() => setImageError(true)}
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-500 text-3xl sm:text-4xl md:text-5xl font-semibold">
+                  <div className="w-full h-full flex items-center justify-center text-muted-foreground text-3xl sm:text-4xl md:text-5xl font-semibold">
                     {userData.name ? userData.name.charAt(0).toUpperCase() : "U"}
                   </div>
                 )}
@@ -283,7 +284,7 @@ export default function ProfilePage() {
                   <div>
                     <label
                       htmlFor="name"
-                      className="block text-sm font-medium text-gray-700 mb-1"
+                      className="block text-sm font-medium text-foreground mb-1"
                     >
                       Name
                     </label>
@@ -293,14 +294,14 @@ export default function ProfilePage() {
                       name="name"
                       value={editableData.name}
                       onChange={handleChange}
-                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground text-sm sm:text-base"
                     />
                   </div>
 
                   <div>
                     <label
                       htmlFor="username"
-                      className="block text-sm font-medium text-gray-700 mb-1"
+                      className="block text-sm font-medium text-foreground mb-1"
                     >
                       Username
                     </label>
@@ -311,33 +312,33 @@ export default function ProfilePage() {
                         name="username"
                         value={editableData.username}
                         onChange={handleChange}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base pr-10"
+                        className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground text-sm sm:text-base pr-10"
                       />
                       {editableData.username.length >= 3 && editableData.username !== userData.username && (
                         <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                           {checkingUsername ? (
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
                           ) : usernameAvailable === true ? (
                             <span className="text-green-500">✓</span>
                           ) : usernameAvailable === false ? (
-                            <span className="text-red-500">✗</span>
+                            <span className="text-destructive">✗</span>
                           ) : null}
                         </div>
                       )}
                     </div>
                     {editableData.username.length >= 3 && editableData.username !== userData.username && usernameAvailable === false && (
-                      <p className="mt-1 text-sm text-red-600">Username is already taken</p>
+                      <p className="mt-1 text-sm text-destructive">Username is already taken</p>
                     )}
                     {editableData.username.length >= 3 && editableData.username !== userData.username && usernameAvailable === true && (
                       <p className="mt-1 text-sm text-green-600">Username is available</p>
                     )}
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       Your profile will be available at: proficia.com/profile/{editableData.username || 'username'}
                     </p>
                   </div>
 
                   <div>
-                    <label htmlFor="email-display" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="email-display" className="block text-sm font-medium text-foreground mb-1">
                       Email
                     </label>
                     <input
@@ -345,9 +346,9 @@ export default function ProfilePage() {
                       type="email"
                       value={userData.email}
                       disabled
-                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-md bg-gray-50 text-gray-500 text-sm sm:text-base"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-input rounded-md bg-muted text-muted-foreground text-sm sm:text-base"
                     />
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       Email cannot be changed
                     </p>
                   </div>
@@ -361,7 +362,7 @@ export default function ProfilePage() {
                     <button
                       type="button"
                       onClick={handleEditModeToggle}
-                      className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-sm sm:text-base transition-colors"
+                      className="px-3 sm:px-4 py-2 sm:py-3 border border-input rounded-md text-foreground hover:bg-accent/10 text-sm sm:text-base transition-colors"
                     >
                       Cancel
                     </button>
@@ -369,7 +370,7 @@ export default function ProfilePage() {
                 </form>
               ) : passwordMode ? (
                 <form onSubmit={handlePasswordSubmit} className="space-y-4">
-                  <h2 className="text-lg font-medium text-gray-900 mb-4">
+                  <h2 className="text-lg font-medium text-foreground mb-4">
                     Change Password
                   </h2>
 
@@ -378,7 +379,7 @@ export default function ProfilePage() {
                       <div>
                         <label
                           htmlFor="currentPassword"
-                          className="block text-sm font-medium text-gray-700 mb-1"
+                          className="block text-sm font-medium text-foreground mb-1"
                         >
                           Current Password
                         </label>
@@ -389,14 +390,14 @@ export default function ProfilePage() {
                           value={passwordData.currentPassword}
                           onChange={handlePasswordChange}
                           required
-                          className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                          className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground text-sm sm:text-base"
                         />
                       </div>
 
                       <div>
                         <label
                           htmlFor="newPassword"
-                          className="block text-sm font-medium text-gray-700 mb-1"
+                          className="block text-sm font-medium text-foreground mb-1"
                         >
                           New Password
                         </label>
@@ -407,9 +408,9 @@ export default function ProfilePage() {
                           value={passwordData.newPassword}
                           onChange={handlePasswordChange}
                           required
-                          className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                          className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground text-sm sm:text-base"
                         />
-                        <p className="mt-1 text-xs text-gray-500">
+                        <p className="mt-1 text-xs text-muted-foreground">
                           Password must be at least 8 characters long
                         </p>
                       </div>
@@ -417,7 +418,7 @@ export default function ProfilePage() {
                       <div>
                         <label
                           htmlFor="confirmPassword"
-                          className="block text-sm font-medium text-gray-700 mb-1"
+                          className="block text-sm font-medium text-foreground mb-1"
                         >
                           Confirm New Password
                         </label>
@@ -428,7 +429,7 @@ export default function ProfilePage() {
                           value={passwordData.confirmPassword}
                           onChange={handlePasswordChange}
                           required
-                          className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                          className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground text-sm sm:text-base"
                         />
                       </div>
 
@@ -441,7 +442,7 @@ export default function ProfilePage() {
                         <button
                           type="button"
                           onClick={handlePasswordModeToggle}
-                          className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-sm sm:text-base transition-colors"
+                          className="px-3 sm:px-4 py-2 sm:py-3 border border-input rounded-md text-foreground hover:bg-accent/10 text-sm sm:text-base transition-colors"
                         >
                           Cancel
                         </button>
@@ -449,13 +450,13 @@ export default function ProfilePage() {
                     </>
                   ) : (
                     <div className="py-4">
-                      <p className="text-gray-700">
+                      <p className="text-foreground">
                         Password cannot be changed for Google accounts. Your password is managed by Google.
                       </p>
                       <button
                         type="button"
                         onClick={handlePasswordModeToggle}
-                        className="mt-4 px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-sm sm:text-base transition-colors"
+                        className="mt-4 px-3 sm:px-4 py-2 sm:py-3 border border-input rounded-md text-foreground hover:bg-accent/10 text-sm sm:text-base transition-colors"
                       >
                         Back to Profile
                       </button>
@@ -465,36 +466,36 @@ export default function ProfilePage() {
               ) : (
                 <div className="space-y-6">
                   <div>
-                    <h2 className="text-lg font-medium text-gray-900">
+                    <h2 className="text-lg font-medium text-foreground">
                       Account Information
                     </h2>
                     <div className="mt-4 space-y-4">
                       <div>
-                        <p className="text-sm font-medium text-gray-500">Name</p>
-                        <p className="mt-1 text-base sm:text-lg">{userData.name || "-"}</p>
+                        <p className="text-sm font-medium text-muted-foreground">Name</p>
+                        <p className="mt-1 text-base sm:text-lg text-foreground">{userData.name || "-"}</p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-500">Username</p>
-                        <p className="mt-1 text-base sm:text-lg">@{userData.username || "Not set"}</p>
+                        <p className="text-sm font-medium text-muted-foreground">Username</p>
+                        <p className="mt-1 text-base sm:text-lg text-foreground">@{userData.username || "Not set"}</p>
                         {userData.username && (
-                          <p className="mt-1 text-sm text-gray-500">
-                            Profile URL: <a href={`/profile/${userData.username}`} className="text-blue-600 hover:underline">
+                          <p className="mt-1 text-sm text-muted-foreground">
+                            Profile URL: <a href={`/profile/${userData.username}`} className="text-primary hover:underline font-medium">
                               proficia.com/profile/{userData.username}
                             </a>
                           </p>
                         )}
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-500">
+                        <p className="text-sm font-medium text-muted-foreground">
                           Email
                         </p>
-                        <p className="mt-1 text-base sm:text-lg">{userData.email}</p>
+                        <p className="mt-1 text-base sm:text-lg text-foreground">{userData.email}</p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-500">
+                        <p className="text-sm font-medium text-muted-foreground">
                           Account Type
                         </p>
-                        <p className="mt-1 text-base sm:text-lg">
+                        <p className="mt-1 text-base sm:text-lg text-foreground">
                           {userData.email.includes("@gmail.com")
                             ? "Google Account"
                             : "Email & Password"}
@@ -511,7 +512,7 @@ export default function ProfilePage() {
                     <button
                       type="button"
                       onClick={handlePasswordModeToggle}
-                      className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-sm sm:text-base transition-colors"
+                      className="px-3 sm:px-4 py-2 sm:py-3 border border-input rounded-md text-foreground hover:bg-accent/10 text-sm sm:text-base transition-colors"
                     >
                       Change Password
                     </button>
