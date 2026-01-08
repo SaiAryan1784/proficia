@@ -44,12 +44,12 @@ export function BrandLogo({
 
     // Define Logo Paths
     // Full Logo (Text + Icon style usually)
-    const FullLogoLight = "/logo/Light_ProficiaTextLogo.svg";
-    const FullLogoDark = "/logo/Dark_ProficiaTextLogo.svg";
+    const FullLogoLight = "/logo/Light_ProficiaTextLogo.webp";
+    const FullLogoDark = "/logo/Dark_ProficiaTextLogo.webp";
 
     // Icon Only (P)
-    const IconLogoLight = "/logo/Light_Logo.svg";
-    const IconLogoDark = "/logo/Dark_logo.svg";
+    const IconLogoLight = "/logo/Light_Logo.webp";
+    const IconLogoDark = "/logo/Dark_logo.webp";
 
     const src = variant === "full"
         ? (isDark ? FullLogoDark : FullLogoLight)
